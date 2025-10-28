@@ -1,0 +1,22 @@
+{
+  "name": "Waacking Battle Trainer",
+  "short_name": "Waacking App",
+  "description": "Tu sistema de entrenamiento de Waacking para practicar en cualquier lugar.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#bb86fc",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "images/icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "images/icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

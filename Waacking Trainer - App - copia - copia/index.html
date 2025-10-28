@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whacking Battle Trainer (Spotify)</title> <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#bb86fc">
+</head>
+<body>
+    <div id="toast-container"></div>
+    <div class="app-container">
+
+        <h1 class="main-title">
+            <img src="images/icon-192x192.png" alt="App Logo" class="title-logo">
+            Whacking Battle Trainer
+        </h1>
+        <section class="info-panel">
+            <button class="info-btn" data-modal="presentacion-modal">Presentación</button>
+            <button class="info-btn" data-modal="tutorial-modal">Tutorial de uso</button>
+            <button class="info-btn" data-modal="contacto-modal">Contacto</button>
+        </section>
+        <div class="container">
+            <section class="panel playlist-panel">
+                <div class="saved-playlists-controls">
+                    <h2><span class="icon">💾</span> Mis Playlists</h2>
+                    <select id="saved-playlists-select"><option value="">Cargar una playlist...</option></select>
+                    <button id="delete-playlist-btn" class="button secondary">Borrar Playlist Seleccionada</button>
+                </div>
+                <hr>
+                <h2><span class="icon">➕</span> Armar / Editar Playlist</h2>
+                <div class="playlist-buttons">
+                    <label for="add-mp3-input" class="button" style="display: none;">Añadir Archivos MP3</label>
+                    <input type="file" id="add-mp3-input" multiple accept="audio/*" style="display: none;">
+                    <button id="add-youtube-btn" class="button" style="display: none;">Añadir desde YouTube</button>
+                    <button id="add-spotify-playlist-btn" class="button">Añadir Playlist Spotify (Link)</button>
+                    <button id="connect-spotify-btn" class="button">Conectar con Spotify</button>
+                </div>
+                <div class="current-playlist-management">
+                    <h4>Gestión de la Lista Actual</h4>
+                    <div class="playlist-name-group">
+                        <input type="text" id="playlist-name-input" placeholder="Nombre para guardar">
+                        <button id="save-playlist-btn" class="button primary">Guardar</button>
+                    </div>
+                    <button id="clear-playlist-btn" class="button secondary">Vaciar Lista</button>
+                </div>
+                <button id="toggle-playlist-btn" class="button secondary">Mostrar Lista (0)</button>
+                <ul id="playlist-ul"></ul>
+                 <div id="spotify-status" style="display: none; margin-top: 10px; text-align: center;">
+                    Conectado como: <span id="spotify-user" style="font-weight: bold;"></span> <button id="disconnect-spotify-btn" class="button small danger">Desconectar</button>
+                </div>
+            </section>
+            <section class="panel player-panel" id="player-panel">
+                 <div id="welcome-message">
+                     <h3>¡Bienvenidxs!</h3>
+                     <p style="text-align: center; line-height: 1.6;">Conecta tu cuenta y añade playlists de Spotify para empezar.</p> <p style="text-align: center; font-size: 0.9em;">Usa los botones de arriba para ver la presentación y el tutorial.</p>
+                 </div>
+                 <div id="player-controls" style="display: none;">
+                     <div class="fixed-controls">
+                        <h3 id="current-song-title"></h3>
+                        <div id="countdown-display"></div>
+                        <div class="controls-wrapper">
+                            <button id="prev-btn" class="control-btn">⏮️</button>
+                            <button id="play-pause-btn" class="control-btn play-btn">▶️</button>
+                            <button id="next-btn" class="control-btn">⏭️</button>
+                            <button id="toggle-video-btn" class="control-btn" title="Mostrar/Ocultar video" style="display: none;">📺</button>
+                        </div>
+                    </div>
+                    <div id="youtube-player-container" style="display: none;"><div id="youtube-player"></div></div>
+                    <div id="spotify-player-container" style="width: 100%; height: 80px; margin-top: 20px;"></div>
+                 </div>
+            </section>
+            <section class="panel config-panel">
+                <h2><span class="icon">⚙️</span> Configuración</h2>
+               <div class="config-group">
+                   <label>Duración del Round</label>
+                   <div class="btn-group">
+                       <button id="duration-40" class="config-btn active">40 seg</button>
+                       <button id="duration-60" class="config-btn">1 min</button>
+                   </div>
+               </div>
+               <div class="config-group">
+                   <label for="segment-select">Segmento de Canción</label>
+                   <select id="segment-select">
+                       <option value="principio">Principio</option>
+                       <option value="medio">Medio</option>
+                       <option value="final">Final</option>
+                       <option value="azar">Azar</option>
+                   </select>
+               </div>
+               <div class="config-group">
+                   <label for="gap-input">Pausa entre Canciones (seg)</label>
+                   <input type="number" id="gap-input" value="3" min="0" max="10">
+               </div>
+               <div class="session-buttons">
+                   <button id="start-session-btn">¡COMENZAR SESIÓN!</button>
+                   <button id="end-session-btn" class="button danger">Finalizar Sesión</button>
+               </div>
+            </section>
+        </div>
+    </div>
+
+    <div id="modal-overlay" class="hidden">
+        <div id="presentacion-modal" class="modal hidden">
+             <button class="close-modal-btn">×</button>
+             <div class="modal-content">
+                 <h2>Presentación</h2>
+                 <h4>Whacking Battle Trainer: Tu Sesión de Baile Automatizada.</h4>
+                 <p>Esta es una aplicación web diseñada para automatizar tus entrenamientos, replicando la sensación de una batalla o un showcase. Te permite cargar tu música, configurar los rounds y olvidarte del celular para concentrarte 100% en bailar.</p>
+                 <hr>
+                 <h4>Detalles Pensados para Bailarines:</h4>
+                 <ul>
+                     <li><b>Rounds a Medida:</b> Elegí la duración de tus salidas (40 o 60 segundos) para practicar con los tiempos de una batalla real.</li>
+                     <li><b>Pausa para Respirar:</b> Entre cada round, tenés unos segundos de pausa (que podés configurar) para recuperar el aliento y prepararte para la siguiente canción.</li>
+                     <li><b>Transiciones de DJ (Fade-In & Out):</b> La música no te sorprende. Sube y baja suavemente al inicio y final de cada round, dándote tiempo para empezar y terminar tu fraseo sin cortes bruscos.</li>
+                     <li><b>Entrenamiento por Segmentos:</b> ¿Siempre bailás los mismos 30 segundos de cada tema? Con las opciones de "Principio", "Medio" y "Final", podés forzarte a entrenar con diferentes partes de las canciones.</li>
+                     <li><b>Modo Azar Inteligente:</b> La opción "Azar" está diseñada para respetar la musicalidad. En vez de empezar en un segundo cualquiera, el sistema lo ajusta para que coincida con la estructura de la música. La mayoría de temas funk y disco de Whacking tienen un tempo ~120 BPM. Esto permite que haya más posibilidades de que la canción arranque en el "1", el inicio de una frase musical, para que tu entrada sea siempre potente.</li>
+                     <li><b>Cero Interrupciones (Pantalla Activa):</b> Al iniciar una sesión, la app evita que la pantalla de tu celular se apague. Tu única misión es bailar, sin tocar nada.</li>
+                     <li><b>Flujo Ininterrumpido (Anti-Errores):</b> ¿Un video de YouTube está protegido? La app te avisará con una notificación que no detiene la música y <strong>saltará automáticamente al siguiente tema</strong>. El ritmo nunca para.</li>
+                 </ul>
+             </div>
+         </div>
+         <div id="tutorial-modal" class="modal hidden">
+             <button class="close-modal-btn">×</button>
+             <div class="modal-content">
+                 <h2>Tutorial de uso</h2>
+                 <h4>¡Bienvenidxs al Trainer!</h4>
+                 <p>Esta app está diseñada para que sus entrenamientos sean fluidos y enfocados. Aquí te explicamos cómo funciona:</p>
+                 <ol>
+                     <li><strong>Carga tu Música:</strong> Presiona "Añadir Playlist Spotify (Link)" y pega el enlace de la playlist que quieras usar. Necesitarás conectar tu cuenta de Spotify primero.</li> <li><strong>Guarda tu Playlist (Opcional):</strong> Si te gustó la lista que armaste, ponele un nombre claro en el campo de "Nombre para guardar" y presioná "Guardar". La próxima vez, podrás cargarla al instante desde el menú "Mis Playlists".</li>
+                     <li><strong>Configura tu Sesión y ¡a Bailar!:</strong> En el panel de Configuración, ajusta tu sesión. Cuando esté todo listo, ¡presioná "¡COMENZAR SESIÓN!".</li>
+                 </ol>
+                 <hr>
+                 <h4>Solución a problemas comunes</h4>
+                 <ul>
+                     <li><b>"Spotify me dice que necesito Premium":</b> La reproducción dentro de la app requiere una cuenta Spotify Premium.</li>
+                     <li><b>"No se carga la playlist de Spotify":</b> Asegúrate de estar conectado a internet y de haber iniciado sesión con Spotify en la app. Verifica que el link sea correcto.</li>
+                     <li><b>"No se escucha nada":</b> Revisá que el volumen de 'multimedia' de tu celular no esté en silencio.</li>
+                 </ul>
+             </div>
+         </div>
+         <div id="contacto-modal" class="modal hidden">
+             <button class="close-modal-btn">×</button>
+             <div class="modal-content">
+                 <h2>Contacto</h2>
+                 <h4>Hola, soy Eric</h4>
+                 <p>Soy estudiante avanzado de Ciencias de la Educación en la Universidad de San Andrés y whacker por hobby desde hace más de 5 años.</p>
+                 <hr>
+                 <h4>¿Por qué cree esta herramienta?</h4>
+                 <p>La primera vez que fui a una competencia de Whacking, me sentí como si descubriera un mundo nuevo. La comunidad unida, la energía de divas y el amor por la danza de las batallas me dejaron una huella, y desde ahí supe que quería dedicarme a entrenar para, algún día, poder competir.</p>
+                 <p>El problema era que no siempre tenía con quién practicar; alguien que regulara el tiempo o cambiara las canciones para simular una batalla real y poder enfocarme en mis entradas. Como no sé nada de programación, empecé a construirme esta aplicación en un largo proceso de idas y vueltas con Gemini (la IA de Google). El resultado es esta herramienta, un "partner digital" que hoy me permite entrenar para una competencia en donde sea.</p>
+                 <p>Mi objetivo con esta app es simple: compartirla de forma gratuita con todxs lxs whackers que la necesiten, para que puedan entrenar siempre que quieran.</p>
+                 <hr>
+                 <h4>¿Ideas o Sugerencias?</h4>
+                 <p>Si tenés alguna idea para mejorar la app o simplemente querés conectar, podés encontrarme en:</p>
+                 <ul>
+                    <li><strong>Instagram:</strong> <a href="https://www.instagram.com/Genga_eric" target="_blank" rel="noopener noreferrer">@Genga_eric</a></li>
+                 </ul>
+             </div>
+         </div>
+    </div>
+
+    <audio id="sfx-player"></audio>
+
+    <script src="https://unpkg.com/dexie@3/dist/dexie.js"></script>
+    <script src="script.js"></script> <script src="https://sdk.scdn.co/spotify-player.js"></script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW Registrado')).catch(err => console.log('SW Error:', err));
+            });
+        }
+    </script>
+</body>
+</html>

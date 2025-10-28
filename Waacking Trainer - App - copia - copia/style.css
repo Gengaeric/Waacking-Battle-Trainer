@@ -1,0 +1,197 @@
+/* ##### COMIENZO style.css (v31 - Completo y Corregido) ##### */
+:root {
+    --bg-color: #121212; --panel-bg: #1e1e1e; --primary-color: #bb86fc;
+    --primary-variant: #3700b3; --text-color: #e0e0e0; --border-color: #333;
+    --danger-color: #cf6679; --success-color: #4CAF50; --info-color: #2196F3;
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0;
+    display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+}
+.app-container { width: 100%; max-width: 1400px; padding: 20px; box-sizing: border-box; }
+.main-title {
+    display: flex; align-items: center; justify-content: flex-start; gap: 15px; width: 100%;
+    font-size: 2.2rem; color: var(--primary-color); margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px;
+}
+.title-logo { height: 60px; width: 60px; }
+.container { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px; width: 100%; height: 80vh; }
+.panel {
+    background-color: var(--panel-bg); border-radius: 12px; padding: 20px;
+    display: flex; flex-direction: column; border: 1px solid var(--border-color); gap: 15px;
+    overflow: hidden; /* Evitar que el contenido se desborde */
+}
+h2, h3 { margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+/* Estilos base para botones y controles */
+.button, .config-btn, .info-btn, #start-session-btn, #end-session-btn, select, input[type="text"], input[type="number"] {
+    width: 100%; padding: 10px 15px; /* Ajuste padding */ border-radius: 6px; border: 1px solid var(--border-color);
+    background-color: #333; color: var(--text-color); cursor: pointer;
+    font-size: 16px; text-align: center; box-sizing: border-box; transition: background-color 0.2s;
+    line-height: 1.5; /* Asegurar altura consistente */
+    margin-bottom: 5px; /* Pequeño margen inferior por defecto */
+}
+/* Eliminar margen inferior del último elemento en grupos */
+.playlist-buttons > *:last-child,
+.config-group > *:last-child,
+.session-buttons > *:last-child,
+.saved-playlists-controls > *:last-child,
+.current-playlist-management > *:last-child {
+    margin-bottom: 0;
+}
+
+.button:hover, .config-btn:hover, .info-btn:hover { background-color: #444; }
+.button.secondary, .info-btn { background-color: #555; }
+.button.secondary:hover, .info-btn:hover { background-color: #666; }
+.button.danger { background-color: var(--danger-color); color: var(--bg-color); font-weight: bold; }
+select {
+    -webkit-appearance: none; appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23e0e0e0%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat; background-position: right 10px center; background-size: 10px;
+    padding-right: 30px; /* Espacio para la flecha */
+}
+input[type="number"] { text-align: right; padding-right: 10px;}
+input[type="text"], input[type="number"] { cursor: text; } /* Cursor normal para inputs */
+.playlist-buttons { display: flex; flex-direction: column; gap: 10px; }
+/* Ocultar input file */
+#add-mp3-input { display: none; }
+/* Hacer que el label parezca un botón */
+label[for="add-mp3-input"] { display: block; /* O inline-block si prefieres */ }
+
+#playlist-ul {
+    list-style: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1;
+    border: 1px solid var(--border-color); border-radius: 6px; min-height: 100px;
+}
+#playlist-ul li { padding: 10px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; cursor: grab; user-select: none; gap: 10px; /* Añadir gap */ }
+#playlist-ul li:last-child { border: none; }
+#playlist-ul li:hover { background-color: #2a2a2a; }
+#playlist-ul li .delete-btn { background: none; border: none; color: #ff5555; cursor: pointer; font-size: 18px; margin-left: auto; padding: 0 5px; line-height: 1; }
+/* Estilo para los tipos de track */
+#playlist-ul li .track-type {
+    font-size: 0.75em; /* Más pequeño */
+    padding: 2px 6px; border-radius: 4px; color: white;
+    font-weight: bold; flex-shrink: 0; /* Evitar que se encoja */
+}
+#playlist-ul li .track-type.mp3 { background-color: var(--primary-variant); }
+#playlist-ul li .track-type.youtube { background-color: #c4302b; }
+#playlist-ul li .track-type.spotify { background-color: #1DB954; } /* Estilo para Spotify */
+/* Estilo para el nombre del track (ocupar espacio restante) */
+#playlist-ul li span:not(.track-type) {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1;
+}
+
+.player-panel { justify-content: start; align-items: center; text-align: center; }
+#player-panel.session-active #welcome-message { display: none; }
+#player-panel.session-active #player-controls { display: flex; }
+#welcome-message { padding: 20px; text-align: center; margin-top: 10vh; }
+#welcome-message h3 { font-size: 1.5rem; color: var(--primary-color); border: none; }
+#player-controls {
+    display: none; width: 100%; height: 100%; position: relative;
+    flex-direction: column; justify-content: start; align-items: center; gap: 20px;
+    padding-top: 8vh;
+}
+.fixed-controls { display: flex; flex-direction: column; gap: 20px; align-items: center; width: 100%; }
+#current-song-title { font-size: 1.5rem; border: none; padding: 0 10px; margin: 0; min-height: 27px; line-height: 1.2; word-break: break-word; /* Para nombres largos */ }
+#countdown-display { font-size: 8rem; font-weight: bold; color: var(--primary-color); display: none; text-shadow: 0 0 20px rgba(0,0,0,0.7); margin: 0; min-height: 27px; line-height: 1; }
+#countdown-display.final-seconds { color: var(--danger-color); animation: pulse 1s infinite; }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+.controls-wrapper { display: flex; gap: 20px; align-items: center;}
+.control-btn { font-size: 2rem; background: none; border: none; color: var(--text-color); cursor: pointer; padding: 0 10px; }
+.play-btn { font-size: 3rem; color: var(--primary-color); }
+.config-group { display: flex; flex-direction: column; gap: 8px; }
+.btn-group { display: flex; gap: 10px; }
+.config-btn.active { background-color: var(--primary-color); color: var(--bg-color); font-weight: bold; }
+.session-buttons { display: flex; flex-direction: column; gap: 10px; margin-top: auto; /* Empujar al fondo */ }
+#start-session-btn { background-color: var(--primary-variant); color: var(--text-color); font-weight: bold; font-size: 1.2rem; padding: 15px; }
+#start-session-btn:hover { background-color: var(--primary-color); }
+hr { border: none; border-top: 1px solid var(--border-color); margin: 15px 0; width: 100%; }
+.saved-playlists-controls, .playlist-name-group { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.playlist-name-group { flex-direction: row; }
+.playlist-name-group input { flex-grow: 1; min-width: 50px; /* Evitar que se encoja demasiado */ }
+.playlist-name-group button { flex-shrink: 0; width: auto; /* Ancho automático */}
+.button.primary { background-color: var(--primary-variant); }
+.button.primary:hover { background-color: var(--primary-color); }
+#playlist-name-input { background-color: #2a2a2a; border: 1px solid var(--border-color); color: var(--text-color); padding: 10px; border-radius: 6px; width: 100%; box-sizing: border-box; }
+
+#youtube-player-container { width: 100%; max-width: 640px; /* Limitar ancho máximo */ aspect-ratio: 16/9; background-color: #000; border-radius: 8px; overflow: hidden; display: none; z-index: 10; margin-top: 20px; }
+#youtube-player-container.visible { display: block; }
+#youtube-player { width: 100%; height: 100%; }
+#toggle-video-btn { font-size: 1.5rem; display: none; }
+#toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px;}
+.toast { padding: 15px; border-radius: 8px; font-weight: bold; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.4); opacity: 0; transform: translateX(100%); animation: slideInFadeOut 5s forwards; }
+.toast.error { background-color: var(--danger-color); }
+.toast.success { background-color: var(--success-color); }
+.toast.info { background-color: var(--info-color); }
+@keyframes slideInFadeOut { 0% { opacity: 0; transform: translateX(100%); } 15% { opacity: 1; transform: translateX(0); } 85% { opacity: 1; transform: translateX(0); } 100% { opacity: 0; transform: translateX(100%); } }
+.current-playlist-management { display: flex; flex-direction: column; gap: 10px; }
+.current-playlist-management h4 { margin: 0 0 5px 0; /* Ajuste margen */ padding: 0; border: none; font-size: 0.9em; color: var(--primary-color); text-align: left; }
+#toggle-playlist-btn { display: none; } /* Oculto en desktop */
+.info-panel { display: flex; gap: 10px; margin-bottom: 20px; width: 100%; }
+#modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center; z-index: 1001; opacity: 1; transition: opacity 0.3s ease; pointer-events: auto; }
+#modal-overlay.hidden { opacity: 0; pointer-events: none; }
+.modal { background-color: var(--panel-bg); padding: 25px; padding-top: 40px; border-radius: 12px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; position: relative; border: 1px solid var(--border-color); transform: scale(1); transition: transform 0.3s ease; display: block; }
+.modal.hidden { display: none; }
+.close-modal-btn { position: absolute; top: 5px; right: 15px; background: none; border: none; color: var(--text-color); font-size: 2.5rem; cursor: pointer; padding: 5px; line-height: 1; }
+.modal-content h4 { color: var(--primary-color); margin-top: 0; margin-bottom: 10px; font-size: 1.2em; }
+.modal-content p, .modal-content li { line-height: 1.6; }
+.modal-content ul, .modal-content ol { text-align: left; padding-left: 20px; }
+.modal-content li { margin-bottom: 10px; }
+.modal-content a { color: var(--primary-color); text-decoration: none; }
+.modal-content a:hover { text-decoration: underline; }
+
+/* Drag and Drop feedback visual */
+#playlist-ul li.dragging { opacity: 0.5; background: #333; }
+
+/* Iconos en títulos */
+.icon { margin-right: 5px; }
+
+/* Media Query para móviles */
+@media (max-width: 900px) {
+    .container { grid-template-columns: 1fr; height: auto; /* Permitir altura automática */ overflow-y: visible; /* Quitar scroll del contenedor principal */ }
+    .panel { overflow-y: auto; /* Añadir scroll a paneles si es necesario */ } /* Permitir scroll vertical EN PANELES */
+    .main-title { font-size: 1.5rem; justify-content: center; /* Centrar título */ }
+    .title-logo { height: 40px; width: 40px; }
+    #countdown-display { font-size: 5rem; }
+    .info-panel { flex-direction: column; }
+    .playlist-buttons label, .playlist-buttons button { padding: 12px 15px; /* Más padding en móvil */ }
+    .playlist-name-group { flex-direction: column; /* Apilar input y botón */ }
+    .playlist-name-group button { flex-basis: auto; /* Resetear base */ }
+    #toggle-playlist-btn { display: block; } /* Mostrar botón toggle */
+    #playlist-ul {
+        max-height: 0; min-height: 0; overflow: hidden;
+        transition: max-height 0.4s ease-out; border: none; margin-top: 0; /* Ajuste margen */
+    }
+    #playlist-ul.visible {
+        max-height: 30vh; min-height: 100px; overflow-y: auto;
+        border: 1px solid var(--border-color); margin-top: 10px;
+    }
+    .player-panel { /* Asegurar que no se encoja demasiado */ min-height: 40vh; }
+    #player-controls { padding-top: 5vh; /* Menos padding superior */ }
+    .control-btn { font-size: 1.8rem; }
+    .play-btn { font-size: 2.5rem; }
+    #current-song-title { font-size: 1.2rem; }
+    .session-buttons { margin-top: 20px; /* Espacio arriba en móvil */ }
+}
+
+/* **** ESTILOS AÑADIDOS PARA SPOTIFY **** */
+/* Estilo para el botón pequeño de desconectar Spotify */
+.button.small {
+    padding: 5px 10px;
+    font-size: 12px;
+    width: auto; /* Para que no ocupe todo el ancho */
+    display: inline-block; /* Para que esté al lado del texto */
+    margin-left: 10px; /* Espacio a la izquierda */
+    margin-bottom: 0; /* Sobrescribir margen por defecto */
+    line-height: 1.2; /* Ajustar altura línea */
+}
+
+/* Asegurar que el color danger funcione bien y tenga hover */
+.button.danger {
+    background-color: #cf6679; /* Color rojo de peligro */
+    color: #121212; /* Texto oscuro para contraste */
+    font-weight: bold;
+}
+.button.danger:hover {
+    background-color: #b00020; /* Rojo más oscuro al pasar el mouse */
+}
+/* **** FIN ESTILOS AÑADIDOS **** */
+/* ##### FINAL style.css ##### */
