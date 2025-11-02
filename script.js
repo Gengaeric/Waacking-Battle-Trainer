@@ -53,7 +53,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   const audio = new Audio();
   let ytPlayer;
   let ytPlayerReady = false;
-  let roundTimeout, gapTimeout, fadeOutTimeout, fadeInterval, fadeInInterval;
+  let roundTimeout,
+    gapTimeout,
+    fadeOutTimeout,
+    fadeInterval,
+    fadeInInterval,
+    countdownStartTimeout,
+    fadeOutCompletionTimeout;
   let countdownIntervalId = null;
   let roundEndTime = null;
   let timeRemainingOnPause = null;
@@ -843,10 +849,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   const clearAllTimers = () => {
     clearTimeout(roundTimeout);
     clearTimeout(gapTimeout);
-    clearTimeout(fadeOutTimeout);
+    clearTimeout(countdownStartTimeout);
+    clearTimeout(fadeOutCompletionTimeout);
+    clearInterval(fadeOutTimeout);
     clearInterval(countdownIntervalId);
     clearInterval(fadeInterval);
     clearInterval(fadeInInterval);
+    roundTimeout = null;
+    gapTimeout = null;
+    countdownStartTimeout = null;
+    fadeOutCompletionTimeout = null;
+    fadeOutTimeout = null;
+    countdownIntervalId = null;
+    fadeInterval = null;
+    fadeInInterval = null;
   };
   async function prepareForNewPlaylist() {
     if (isSessionActive) await endSession();
@@ -1483,7 +1499,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     clearAllTimers();
     const roundDurationMs =
       (durationInSeconds || sessionConfig.duration || 40) * 1000;
-    const fadeDurationMs = 4000;
+    const fadeDurationMs = Math.min(4000, roundDurationMs);
     const gapDurationMs = (sessionConfig.gap || 3) * 1000;
 
     console.log(
@@ -1509,121 +1525,59 @@ document.addEventListener("DOMContentLoaded", async () => {
     roundEndTime = Date.now() + roundDurationMs;
     timeRemainingOnPause = null;
 
-    // --- TIMER PRINCIPAL DEL ROUND (inicia fade out antes del final) ---
-    roundTimeout = setTimeout(() => {
-      console.log("[App Timers] Fin del round (inicio fadeOut & gap)...");
-      playSound("sounds/beep.mp3"); // Sonido fin de round
+    const fadeOutStartTime = Math.max(roundDurationMs - fadeDurationMs, 0);
+    const countdownSeconds = Math.min(
+      5,
+      Math.max(Math.floor(fadeOutStartTime / 1000), 1),
+    );
+    const countdownStartDelay = Math.max(
+      fadeOutStartTime - (countdownSeconds - 1) * 1000,
+      0,
+    );
 
-      // --- FADE OUT ---
-      if (currentPlayer) {
-        let currentVolume;
-        let targetVolumeZero = 0;
-        let volumeStep;
-        const intervalTime = 100; // ms
+    let hasStartedFadeOut = false;
+    let gapScheduled = false;
 
-        // Determinar volumen inicial y paso según el player
+    const scheduleGap = () => {
+      if (gapScheduled) return;
+      gapScheduled = true;
+      if (fadeOutTimeout) {
+        clearInterval(fadeOutTimeout);
+        fadeOutTimeout = null;
+      }
+      if (fadeOutCompletionTimeout) {
+        clearTimeout(fadeOutCompletionTimeout);
+        fadeOutCompletionTimeout = null;
+      }
+      try {
         if (currentPlayer === audio) {
-          currentVolume = audio.volume;
-          volumeStep = currentVolume / (fadeDurationMs / intervalTime);
+          audio.pause();
+          audio.volume = 1;
         } else if (
           currentPlayer === ytPlayer &&
-          typeof currentPlayer.getVolume === "function"
+          typeof currentPlayer.pauseVideo === "function"
         ) {
-          currentVolume = currentPlayer.getVolume();
-          volumeStep = currentVolume / (fadeDurationMs / intervalTime);
-          targetVolumeZero = 0;
+          currentPlayer.pauseVideo();
+          if (typeof currentPlayer.setVolume === "function") {
+            currentPlayer.setVolume(100);
+          }
         } else if (
           currentPlayer === spotifyPlayer &&
-          typeof currentPlayer.getVolume === "function"
+          typeof currentPlayer.pause === "function"
         ) {
-          // Spotify SDK getVolume es asíncrono y devuelve 0.0-1.0
-          currentPlayer
-            .getVolume()
-            .then((vol) => {
-              currentVolume = vol;
-              // Ajustar el paso para el volumen base del SDK (0.5)
-              volumeStep =
-                (vol > 0 ? vol : 0.5) / (fadeDurationMs / intervalTime); // Evitar división por cero
-              console.log(
-                `[Spotify FadeOut] Vol inicial: ${vol}, Step: ${volumeStep}`,
-              );
-              clearInterval(fadeOutTimeout); // Limpiar anterior (por si acaso)
-              fadeOutTimeout = setInterval(async () => {
-                // Usar async para Spotify
-                currentVolume -= volumeStep;
-                if (currentVolume > 0) {
-                  try {
-                    await spotifyPlayer.setVolume(Math.max(0, currentVolume));
-                  } catch (e) {
-                    console.warn("[Spotify FadeOut] Error setVolume", e);
-                    clearInterval(fadeOutTimeout);
-                    try {
-                      await spotifyPlayer.setVolume(0);
-                    } catch (e2) {}
-                  }
-                } else {
-                  clearInterval(fadeOutTimeout);
-                  try {
-                    console.log("[Spotify FadeOut] Completo, pausando.");
-                    await spotifyPlayer.pause();
-                    await spotifyPlayer.setVolume(0.5);
-                  } catch (e) {
-                    // Pausar y restaurar volumen
-                    console.warn(
-                      "[Spotify FadeOut] Error al pausar/restaurar",
-                      e,
-                    );
-                  }
-                }
-              }, intervalTime);
-            })
-            .catch((e) =>
-              console.error("[Spotify FadeOut] Error getVolume:", e),
-            );
-        } else {
-          currentVolume = 0;
-          volumeStep = 0;
-        } // Player desconocido
-
-        // Lógica síncrona para Audio y YouTube
-        if (currentPlayer === audio || currentPlayer === ytPlayer) {
-          clearInterval(fadeOutTimeout);
-          fadeOutTimeout = setInterval(() => {
-            currentVolume -= volumeStep;
-            if (currentVolume > targetVolumeZero) {
-              if (currentPlayer === audio) {
-                currentPlayer.volume = Math.max(0, currentVolume);
-              } else {
-                currentPlayer.setVolume(Math.max(0, Math.round(currentVolume)));
-              }
-            } else {
-              clearInterval(fadeOutTimeout);
-              if (currentPlayer === audio) {
-                currentPlayer.pause();
-                currentPlayer.volume = 1;
-              } // Pausar y restaurar
-              else {
-                currentPlayer.pauseVideo();
-                currentPlayer.setVolume(100);
-              } // Pausar y restaurar
-              console.log(
-                `[App Timers] FadeOut ${currentSong?.type} completo, pausado.`,
-              );
-            }
-          }, intervalTime);
+          spotifyPlayer.pause().catch(() => {});
+          if (typeof spotifyPlayer.setVolume === "function") {
+            spotifyPlayer.setVolume(0.5).catch(() => {});
+          }
         }
-      } else {
-        console.warn(
-          "[App Timers] startRoundTimers: No se pudo hacer fadeOut (currentPlayer nulo).",
-        );
+      } catch (e) {
+        console.warn("[App Timers] Error asegurando pausa en scheduleGap:", e);
       }
-
-      // --- GAP TIMER ---
-      if (countdownDisplay)
+      if (countdownDisplay) {
+        countdownDisplay.classList.remove("final-seconds");
         countdownDisplay.textContent = `Pausa: ${sessionConfig.gap}s`;
-      if (countdownDisplay) countdownDisplay.style.display = "block";
-      if (countdownDisplay) countdownDisplay.classList.remove("final-seconds"); // Quitar clase si estaba
-
+        countdownDisplay.style.display = "block";
+      }
       gapTimeout = setTimeout(() => {
         console.log("[App Timers] Fin del gap, siguiente track.");
         if (countdownDisplay) countdownDisplay.style.display = "none";
@@ -1634,32 +1588,198 @@ document.addEventListener("DOMContentLoaded", async () => {
           endSession();
         }
       }, gapDurationMs);
-    }, roundDurationMs); // El round termina aquí, el fadeOut empieza DESPUÉS
+    };
 
-    // --- COUNTDOWN VISUAL (ajustado para empezar antes del fadeOut) ---
-    const countdownStartMs = 5000;
-    const countdownStartTimeRelative = roundDurationMs - countdownStartMs; // 5s antes del fin del round
-    if (roundDurationMs > countdownStartMs) {
-      setTimeout(() => {
-        if (!isPaused && isSessionActive) {
-          console.log("[App Timers] Iniciando countdown final...");
-          if (countdownDisplay) countdownDisplay.style.display = "block";
-          if (countdownDisplay) countdownDisplay.classList.add("final-seconds");
-          let remainingSeconds = Math.ceil(countdownStartMs / 1000);
-          if (countdownDisplay) countdownDisplay.textContent = remainingSeconds;
+    const startFadeOut = () => {
+      if (hasStartedFadeOut || !isSessionActive) return;
+      hasStartedFadeOut = true;
+      console.log("[App Timers] Iniciando fadeOut...");
+      clearTimeout(roundTimeout);
+      roundTimeout = null;
+      clearTimeout(countdownStartTimeout);
+      countdownStartTimeout = null;
+      clearInterval(countdownIntervalId);
+      countdownIntervalId = null;
+
+      if (!currentPlayer) {
+        console.warn(
+          "[App Timers] startRoundTimers: No se pudo hacer fadeOut (currentPlayer nulo).",
+        );
+        scheduleGap();
+        return;
+      }
+
+      const intervalTime = 100;
+      fadeOutCompletionTimeout = setTimeout(() => {
+        scheduleGap();
+      }, fadeDurationMs + intervalTime);
+
+      if (currentPlayer === audio) {
+        let currentVolume = audio.volume;
+        const steps = Math.max(fadeDurationMs / intervalTime, 1);
+        const volumeStep = currentVolume / steps;
+        clearInterval(fadeOutTimeout);
+        fadeOutTimeout = setInterval(() => {
+          currentVolume -= volumeStep;
+          if (currentVolume > 0) {
+            audio.volume = Math.max(0, currentVolume);
+          } else {
+            clearInterval(fadeOutTimeout);
+            fadeOutTimeout = null;
+            audio.pause();
+            audio.volume = 1;
+            console.log("[App Timers] FadeOut mp3 completo, pausado.");
+            scheduleGap();
+          }
+        }, intervalTime);
+        return;
+      }
+
+      if (
+        currentPlayer === ytPlayer &&
+        typeof currentPlayer.getVolume === "function" &&
+        typeof currentPlayer.setVolume === "function"
+      ) {
+        let currentVolume = currentPlayer.getVolume();
+        const steps = Math.max(fadeDurationMs / intervalTime, 1);
+        const volumeStep = currentVolume / steps;
+        clearInterval(fadeOutTimeout);
+        fadeOutTimeout = setInterval(() => {
+          currentVolume -= volumeStep;
+          if (currentVolume > 0) {
+            currentPlayer.setVolume(Math.max(0, Math.round(currentVolume)));
+          } else {
+            clearInterval(fadeOutTimeout);
+            fadeOutTimeout = null;
+            currentPlayer.pauseVideo();
+            currentPlayer.setVolume(100);
+            console.log("[App Timers] FadeOut youtube completo, pausado.");
+            scheduleGap();
+          }
+        }, intervalTime);
+        return;
+      }
+
+      if (
+        currentPlayer === spotifyPlayer &&
+        typeof currentPlayer.getVolume === "function"
+      ) {
+        currentPlayer
+          .getVolume()
+          .then((vol) => {
+            let currentVolume = vol;
+            const steps = Math.max(fadeDurationMs / intervalTime, 1);
+            const volumeStep = (vol > 0 ? vol : 0.5) / steps;
+            console.log(
+              `[Spotify FadeOut] Vol inicial: ${vol}, Step: ${volumeStep}`,
+            );
+            clearInterval(fadeOutTimeout);
+            fadeOutTimeout = setInterval(async () => {
+              currentVolume -= volumeStep;
+              if (currentVolume > 0) {
+                try {
+                  await spotifyPlayer.setVolume(Math.max(0, currentVolume));
+                } catch (e) {
+                  console.warn("[Spotify FadeOut] Error setVolume", e);
+                  clearInterval(fadeOutTimeout);
+                  fadeOutTimeout = null;
+                  try {
+                    await spotifyPlayer.setVolume(0);
+                  } catch (e2) {}
+                  scheduleGap();
+                }
+              } else {
+                clearInterval(fadeOutTimeout);
+                fadeOutTimeout = null;
+                try {
+                  console.log("[Spotify FadeOut] Completo, pausando.");
+                  await spotifyPlayer.pause();
+                  await spotifyPlayer.setVolume(0.5);
+                } catch (e) {
+                  console.warn(
+                    "[Spotify FadeOut] Error al pausar/restaurar",
+                    e,
+                  );
+                }
+                scheduleGap();
+              }
+            }, intervalTime);
+          })
+          .catch((e) => {
+            console.error("[Spotify FadeOut] Error getVolume:", e);
+            scheduleGap();
+          });
+        return;
+      }
+
+      console.warn(
+        "[App Timers] startRoundTimers: Tipo de reproductor sin fadeOut manejado.",
+      );
+      scheduleGap();
+    };
+
+    const startCountdown = () => {
+      if (!isSessionActive || hasStartedFadeOut) return;
+      console.log("[App Timers] Iniciando countdown final...");
+      countdownStartTimeout = null;
+      if (countdownDisplay) {
+        countdownDisplay.style.display = "block";
+        countdownDisplay.classList.add("final-seconds");
+      }
+      clearInterval(countdownIntervalId);
+      let remainingSeconds = countdownSeconds;
+
+      const tick = () => {
+        if (!isSessionActive || hasStartedFadeOut) {
           clearInterval(countdownIntervalId);
-          countdownIntervalId = setInterval(() => {
-            remainingSeconds--;
-            if (remainingSeconds > 0) {
-              if (countdownDisplay)
-                countdownDisplay.textContent = remainingSeconds;
-            } else {
-              clearInterval(countdownIntervalId);
-            }
-          }, 1000);
+          countdownIntervalId = null;
+          return;
         }
-      }, countdownStartTimeRelative);
+        if (remainingSeconds <= 0) {
+          clearInterval(countdownIntervalId);
+          countdownIntervalId = null;
+          return;
+        }
+        if (countdownDisplay) countdownDisplay.textContent = remainingSeconds;
+        playSound("sounds/beep.mp3");
+        if (remainingSeconds === 1) {
+          remainingSeconds = 0;
+          clearInterval(countdownIntervalId);
+          countdownIntervalId = null;
+          startFadeOut();
+          return;
+        }
+        remainingSeconds -= 1;
+      };
+
+      tick();
+
+      if (remainingSeconds > 0 && !hasStartedFadeOut) {
+        countdownIntervalId = setInterval(() => {
+          if (!isSessionActive || hasStartedFadeOut) {
+            clearInterval(countdownIntervalId);
+            countdownIntervalId = null;
+            return;
+          }
+          tick();
+        }, 1000);
+      }
+    };
+
+    if (fadeOutStartTime <= 0) {
+      startCountdown();
+      return;
     }
+
+    if (countdownSeconds > 0) {
+      countdownStartTimeout = setTimeout(() => {
+        startCountdown();
+      }, countdownStartDelay);
+    }
+
+    roundTimeout = setTimeout(() => {
+      startFadeOut();
+    }, fadeOutStartTime + 50);
   }
   function playSound(soundFile, volume = 1.0) {
     sfxPlayer.src = soundFile;
