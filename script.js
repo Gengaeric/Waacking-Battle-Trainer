@@ -1580,7 +1580,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             .catch((e) =>
               console.error("[Spotify FadeOut] Error getVolume:", e),
             );
-          return; // Salir de la lógica síncrona para Spotify fadeOut
         } else {
           currentVolume = 0;
           volumeStep = 0;
