@@ -1,12 +1,13 @@
 // ##### INICIO DEL CÓDIGO PARA sw.js (v47 - Reproducción Spotify) #####
-const CACHE_NAME = 'waacking-trainer-v47'; // Nueva versión
+const CACHE_NAME = 'waacking-trainer-v48'; // Nueva versión
 const urlsToCache = [
   './',
   './index.html', // Versión Spotify Focus (v37 que tenías)
   './style.css',
   './script.js',  // ¡El script.js modificado con lógica de reproducción!
   './manifest.json',
-  './sounds/beep.mp3',
+  './sounds/beep_sporty.mp3',
+  './sounds/beep_sporty_long.mp3',
   'https://unpkg.com/dexie@3/dist/dexie.js', // Dependencia Dexie
   './images/icon-192x192.png',
   './images/icon-512x512.png'
