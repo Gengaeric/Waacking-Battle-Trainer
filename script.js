@@ -1739,7 +1739,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         if (countdownDisplay) countdownDisplay.textContent = secondsLeft;
-        playSound("sounds/beep.mp3");
+        const countdownSound =
+          secondsLeft === 1
+            ? "sounds/beep_sporty_long.mp3"
+            : "sounds/beep_sporty.mp3";
+        playSound(countdownSound);
 
         if (secondsLeft === 1) {
           countdownTimeoutId = null;
