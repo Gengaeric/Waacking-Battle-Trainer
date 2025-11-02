@@ -25,6 +25,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const endSessionBtn = document.getElementById("end-session-btn");
   const duration40Btn = document.getElementById("duration-40");
   const duration60Btn = document.getElementById("duration-60");
+  const orderSequentialBtn = document.getElementById("order-sequential");
+  const orderRandomBtn = document.getElementById("order-random");
   const segmentSelect = document.getElementById("segment-select");
   const gapInput = document.getElementById("gap-input");
   const addYoutubeBtn = document.getElementById("add-youtube-btn");
@@ -47,7 +49,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   // --- Variables de Estado ---
   let playlist = [];
   let currentTrackIndex = 0;
-  let sessionConfig = { duration: 40, segment: "principio", gap: 3 };
+  let playbackOrder = [];
+  let currentOrderPosition = 0;
+  let sessionConfig = {
+    duration: 40,
+    segment: "principio",
+    gap: 3,
+    order: "sequential",
+  };
   let isSessionActive = false;
   let isPaused = true;
   const audio = new Audio();
@@ -71,6 +80,47 @@ document.addEventListener("DOMContentLoaded", async () => {
   let spotifyDeviceId = null;
   // (Asegúrate de NO tener 'spotifyPlayer' o 'spotifyDeviceId' declarados en otro lugar)
   // --- FIN VARIABLES SPOTIFY ---
+
+  function createPlaybackOrder() {
+    playbackOrder = playlist.map((_, index) => index);
+    if (sessionConfig.order === "random") {
+      for (let i = playbackOrder.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [playbackOrder[i], playbackOrder[j]] = [
+          playbackOrder[j],
+          playbackOrder[i],
+        ];
+      }
+    }
+  }
+
+  function playTrackAtOrderPosition(position) {
+    if (!isSessionActive) return;
+    if (position < 0 || position >= playbackOrder.length) {
+      endSession();
+      return;
+    }
+    currentOrderPosition = position;
+    const nextIndex = playbackOrder[position];
+    playTrack(nextIndex);
+  }
+
+  function playNextTrack() {
+    if (!isSessionActive) return;
+    const nextPosition = currentOrderPosition + 1;
+    if (nextPosition >= playbackOrder.length) {
+      endSession();
+      return;
+    }
+    playTrackAtOrderPosition(nextPosition);
+  }
+
+  function playPreviousTrack() {
+    if (!isSessionActive) return;
+    const previousPosition = currentOrderPosition - 1;
+    if (previousPosition < 0) return;
+    playTrackAtOrderPosition(previousPosition);
+  }
   // --- Lógica de Ventanas Modales ---
   infoBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -371,7 +421,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         showToast(`Error playback Spotify: ${message}. Saltando...`, "error");
         clearAllTimers();
         setTimeout(() => {
-          if (isSessionActive) playTrack(++currentTrackIndex);
+          if (isSessionActive) playNextTrack();
         }, 500);
       });
       // Listener de cambio de estado
@@ -837,7 +887,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   function onPlayerError(event) {
     const songName = playlist[currentTrackIndex]?.name || "un video";
     showToast(`"${songName}" no se puede reproducir. Saltando...`, "error");
-    setTimeout(() => playTrack(++currentTrackIndex), 500);
+    setTimeout(() => {
+      if (isSessionActive) playNextTrack();
+    }, 500);
   }
   function showToast(message, type = "error") {
     const toast = document.createElement("div");
@@ -1109,10 +1161,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     requestWakeLock();
     isSessionActive = true;
     isPaused = false;
-    currentTrackIndex = 0;
+    createPlaybackOrder();
+    if (playbackOrder.length === 0) {
+      showToast("No hay canciones disponibles en la playlist.", "error");
+      endSession();
+      return;
+    }
+    currentOrderPosition = 0;
+    const firstIndex = playbackOrder[0] ?? 0;
+    currentTrackIndex = firstIndex;
     playerPanel.classList.add("session-active");
     endSessionBtn.style.display = "block";
-    playTrack(currentTrackIndex);
+    playTrack(firstIndex);
   });
   //PASO III
   async function playTrack(index) {
@@ -1142,13 +1202,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // Verificar fin de sesión
-    if (index >= playlist.length || !isSessionActive) {
+    if (index == null || index >= playlist.length || !isSessionActive) {
       console.log("[App Logic] Fin de playlist o sesión inactiva.");
       await endSession();
       return;
     }
 
     currentTrackIndex = index;
+    const orderPos = playbackOrder.indexOf(index);
+    if (orderPos !== -1) currentOrderPosition = orderPos;
     const song = playlist[index];
     console.log(
       `[App Logic] Reproduciendo [${index}]: ${song.name} (${song.type})`,
@@ -1189,7 +1251,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.warn(`[App Logic] Tipo desconocido (${song.type}), saltando.`);
         showToast(`Tipo de archivo no soportado: ${song.name}`, "warning");
         setTimeout(() => {
-          if (isSessionActive) playTrack(++currentTrackIndex);
+          if (isSessionActive) playNextTrack();
         }, 500); // Saltar
       }
     } catch (error) {
@@ -1197,7 +1259,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       showToast(`Error iniciando ${song.name}. Saltando...`, "error");
       clearAllTimers();
       setTimeout(() => {
-        if (isSessionActive) playTrack(++currentTrackIndex);
+        if (isSessionActive) playNextTrack();
       }, 500); // Saltar en caso de error grave
     }
   }
@@ -1209,7 +1271,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           `Error: MP3 "${song.name}" no encontrado en la DB. Saltando...`,
           "error",
         );
-        setTimeout(() => playTrack(++currentTrackIndex), 500);
+        setTimeout(() => {
+          if (isSessionActive) playNextTrack();
+        }, 500);
         return;
       }
       const fileURL = URL.createObjectURL(record.file);
@@ -1238,7 +1302,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       showToast("Error: Reproductor Spotify no conectado/listo.", "error");
       console.error("[Spotify Play] playSpotifyTrack: Falta token.");
       setTimeout(() => {
-        if (isSessionActive) playTrack(++currentTrackIndex);
+        if (isSessionActive) playNextTrack();
       }, 1500);
       return;
     }
@@ -1252,7 +1316,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!readyDeviceId) {
         showToast("Spotify no terminó de iniciar. Reintenta.", "error");
         setTimeout(() => {
-          if (isSessionActive) playTrack(++currentTrackIndex);
+          if (isSessionActive) playNextTrack();
         }, 1500);
         return;
       }
@@ -1262,7 +1326,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!deviceId) {
       showToast("Spotify no reportó un dispositivo activo.", "error");
       setTimeout(() => {
-        if (isSessionActive) playTrack(++currentTrackIndex);
+        if (isSessionActive) playNextTrack();
       }, 1500);
       return;
     }
@@ -1275,7 +1339,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const transferred = await transferPlayback(deviceId);
       if (!transferred) {
         setTimeout(() => {
-          if (isSessionActive) playTrack(++currentTrackIndex);
+          if (isSessionActive) playNextTrack();
         }, 500);
         return;
       }
@@ -1364,7 +1428,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (playPauseBtn) playPauseBtn.textContent = "▶️";
       clearAllTimers();
       setTimeout(() => {
-        if (isSessionActive) playTrack(++currentTrackIndex);
+        if (isSessionActive) playNextTrack();
       }, 500);
     }
   }
@@ -1582,7 +1646,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.log("[App Timers] Fin del gap, siguiente track.");
         if (countdownDisplay) countdownDisplay.style.display = "none";
         if (isSessionActive) {
-          playTrack(++currentTrackIndex);
+          playNextTrack();
         } else {
           console.log("[App Timers] Sesión inactiva al fin del gap.");
           endSession();
@@ -1801,6 +1865,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     isSessionActive = false;
     isPaused = true;
+    playbackOrder = [];
+    currentOrderPosition = 0;
 
     if (wakeLock) {
       try {
@@ -1963,11 +2029,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     youtubePlayerContainer.classList.toggle("visible");
   });
   nextBtn.addEventListener("click", () => {
-    if (isSessionActive) playTrack(++currentTrackIndex);
+    if (isSessionActive) playNextTrack();
   });
   prevBtn.addEventListener("click", () => {
-    if (isSessionActive && currentTrackIndex > 0)
-      playTrack(--currentTrackIndex);
+    if (isSessionActive && currentOrderPosition > 0) playPreviousTrack();
   });
   duration40Btn.addEventListener("click", () => {
     sessionConfig.duration = 40;
@@ -1980,6 +2045,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     duration40Btn.classList.remove("active");
     console.log("[App Config] Duración cambiada a 60s.");
   });
+  if (orderSequentialBtn && orderRandomBtn) {
+    orderSequentialBtn.addEventListener("click", () => {
+      sessionConfig.order = "sequential";
+      orderSequentialBtn.classList.add("active");
+      orderRandomBtn.classList.remove("active");
+    });
+    orderRandomBtn.addEventListener("click", () => {
+      sessionConfig.order = "random";
+      orderRandomBtn.classList.add("active");
+      orderSequentialBtn.classList.remove("active");
+    });
+  } else {
+    console.warn("[App Init] Botones de orden no encontrados en el DOM.");
+  }
   // --- LISTENERS BOTONES SPOTIFY ---
   if (connectSpotifyBtn) {
     connectSpotifyBtn.addEventListener("click", redirectToSpotifyAuthorize);
