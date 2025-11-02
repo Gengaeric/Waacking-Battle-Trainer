@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     fadeInInterval,
     countdownStartTimeout,
     fadeOutCompletionTimeout;
-  let countdownIntervalId = null;
+  let countdownTimeoutId = null;
   let roundEndTime = null;
   let timeRemainingOnPause = null;
   let hasShownYoutubeWarning = false;
@@ -852,7 +852,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     clearTimeout(countdownStartTimeout);
     clearTimeout(fadeOutCompletionTimeout);
     clearInterval(fadeOutTimeout);
-    clearInterval(countdownIntervalId);
+    clearTimeout(countdownTimeoutId);
     clearInterval(fadeInterval);
     clearInterval(fadeInInterval);
     roundTimeout = null;
@@ -860,7 +860,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     countdownStartTimeout = null;
     fadeOutCompletionTimeout = null;
     fadeOutTimeout = null;
-    countdownIntervalId = null;
+    countdownTimeoutId = null;
     fadeInterval = null;
     fadeInInterval = null;
   };
@@ -1598,8 +1598,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       roundTimeout = null;
       clearTimeout(countdownStartTimeout);
       countdownStartTimeout = null;
-      clearInterval(countdownIntervalId);
-      countdownIntervalId = null;
+      clearTimeout(countdownTimeoutId);
+      countdownTimeoutId = null;
 
       if (!currentPlayer) {
         console.warn(
@@ -1726,44 +1726,35 @@ document.addEventListener("DOMContentLoaded", async () => {
         countdownDisplay.style.display = "block";
         countdownDisplay.classList.add("final-seconds");
       }
-      clearInterval(countdownIntervalId);
-      let remainingSeconds = countdownSeconds;
 
-      const tick = () => {
+      const runCountdownTick = (secondsLeft) => {
         if (!isSessionActive || hasStartedFadeOut) {
-          clearInterval(countdownIntervalId);
-          countdownIntervalId = null;
+          countdownTimeoutId = null;
           return;
         }
-        if (remainingSeconds <= 0) {
-          clearInterval(countdownIntervalId);
-          countdownIntervalId = null;
+
+        if (secondsLeft <= 0) {
+          countdownTimeoutId = null;
           return;
         }
-        if (countdownDisplay) countdownDisplay.textContent = remainingSeconds;
+
+        if (countdownDisplay) countdownDisplay.textContent = secondsLeft;
         playSound("sounds/beep.mp3");
-        if (remainingSeconds === 1) {
-          remainingSeconds = 0;
-          clearInterval(countdownIntervalId);
-          countdownIntervalId = null;
+
+        if (secondsLeft === 1) {
+          countdownTimeoutId = null;
           startFadeOut();
           return;
         }
-        remainingSeconds -= 1;
+
+        countdownTimeoutId = setTimeout(() => {
+          runCountdownTick(secondsLeft - 1);
+        }, 1000);
       };
 
-      tick();
-
-      if (remainingSeconds > 0 && !hasStartedFadeOut) {
-        countdownIntervalId = setInterval(() => {
-          if (!isSessionActive || hasStartedFadeOut) {
-            clearInterval(countdownIntervalId);
-            countdownIntervalId = null;
-            return;
-          }
-          tick();
-        }, 1000);
-      }
+      clearTimeout(countdownTimeoutId);
+      countdownTimeoutId = null;
+      runCountdownTick(countdownSeconds);
     };
 
     if (fadeOutStartTime <= 0) {
@@ -1782,9 +1773,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, fadeOutStartTime + 50);
   }
   function playSound(soundFile, volume = 1.0) {
+    if (!sfxPlayer || !soundFile) return;
+    try {
+      sfxPlayer.pause();
+      sfxPlayer.currentTime = 0;
+    } catch (e) {}
     sfxPlayer.src = soundFile;
     sfxPlayer.volume = volume;
-    sfxPlayer.play();
+    const playPromise = sfxPlayer.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch((error) =>
+        console.warn("[App SFX] Error reproduciendo sonido:", error),
+      );
+    }
   }
 
   async function endSession() {
