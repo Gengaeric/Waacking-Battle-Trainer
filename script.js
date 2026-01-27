@@ -74,6 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   let timeRemainingOnPause = null;
   let hasShownYoutubeWarning = false;
   let wakeLock = null;
+  let spotifyKeepAliveInterval = null;
   // PASO I
   // --- NUEVAS VARIABLES PARA SPOTIFY ---
   let spotifyPlayer = null;
@@ -767,8 +768,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // --- Transferir Playback ---
-  async function transferPlayback(deviceId) {
-    console.log(`[Spotify Play] Transfiriendo a device ID: ${deviceId}`);
+  async function transferPlayback(deviceId, shouldPlay = false) {
+    console.log(
+      `[Spotify Play] Transfiriendo a device ID: ${deviceId} (play=${shouldPlay})`,
+    );
     const accessToken = localStorage.getItem("spotify_access_token");
     if (!accessToken || !deviceId) {
       console.error("[Spotify Play] transferPlayback: Falta token o deviceId.");
@@ -778,7 +781,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       const response = await fetch("https://api.spotify.com/v1/me/player", {
         method: "PUT",
-        body: JSON.stringify({ device_ids: [deviceId], play: false }),
+        body: JSON.stringify({ device_ids: [deviceId], play: shouldPlay }),
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
@@ -1136,11 +1139,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadSavedPlaylists();
   }
 
-  const requestWakeLock = async () => {
+  const requestWakeLock = async (showNotification = true) => {
     if ("wakeLock" in navigator) {
       try {
         wakeLock = await navigator.wakeLock.request("screen");
-        showToast("Pantalla activa durante la sesión.", "info");
+        if (showNotification)
+          showToast("Pantalla activa durante la sesión.", "info");
       } catch (err) {
         console.error(`${err.name}, ${err.message}`);
       }
@@ -1148,6 +1152,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log("Wake Lock no es soportado.");
     }
   };
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      if (isSessionActive) requestWakeLock(false);
+      keepSpotifyPlaybackActive("visible");
+      if (isSpotifySessionActive() && !isPaused) startSpotifyKeepAlive();
+    } else if (isSpotifySessionActive() && !isPaused) {
+      keepSpotifyPlaybackActive("hidden");
+      startSpotifyKeepAlive();
+    }
+  });
 
   startSessionBtn.addEventListener("click", () => {
     if (playlist.length === 0) {
@@ -1229,6 +1244,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       welcomeMessageDiv.style.display = "none"; // Ocultar bienvenida si estaba visible
     if (playerControls) playerControls.style.display = "flex"; // Mostrar controles
 
+    if (song.type === "spotify") startSpotifyKeepAlive();
+    else stopSpotifyKeepAlive();
+
     // Reproducir según tipo
     try {
       if (song.type === "mp3") {
@@ -1262,6 +1280,44 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (isSessionActive) playNextTrack();
       }, 500); // Saltar en caso de error grave
     }
+  }
+
+  function isSpotifySessionActive() {
+    const currentSong = playlist[currentTrackIndex];
+    return isSessionActive && currentSong?.type === "spotify";
+  }
+
+  async function keepSpotifyPlaybackActive(reason = "unknown") {
+    if (!isSpotifySessionActive() || isPaused) return;
+    const accessToken = localStorage.getItem("spotify_access_token");
+    if (!accessToken) return;
+    if (!spotifyDeviceId) {
+      initializeSpotifyPlayer(accessToken);
+      await waitForSpotifyDevice(3000);
+    }
+    if (!spotifyDeviceId) return;
+    console.log(`[Spotify KeepAlive] Manteniendo reproducción (${reason}).`);
+    await transferPlayback(spotifyDeviceId, true);
+    if (spotifyPlayer && typeof spotifyPlayer.resume === "function") {
+      try {
+        await spotifyPlayer.resume();
+      } catch (e) {
+        console.warn("[Spotify KeepAlive] Error reanudando:", e);
+      }
+    }
+  }
+
+  function startSpotifyKeepAlive() {
+    if (spotifyKeepAliveInterval) return;
+    spotifyKeepAliveInterval = setInterval(() => {
+      keepSpotifyPlaybackActive("interval");
+    }, 25000);
+  }
+
+  function stopSpotifyKeepAlive() {
+    if (!spotifyKeepAliveInterval) return;
+    clearInterval(spotifyKeepAliveInterval);
+    spotifyKeepAliveInterval = null;
   }
   async function playMp3FromDB(song) {
     try {
@@ -1877,6 +1933,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.error("[App Logic] Error liberando Wake Lock:", e);
       }
     }
+    stopSpotifyKeepAlive();
     clearAllTimers(); // Detener todos los timers
 
     // Pausar todos los reproductores posibles
@@ -1979,6 +2036,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         } // Spotify es async
 
         if (playPauseBtn) playPauseBtn.textContent = "▶️"; // Actualizar botón
+        stopSpotifyKeepAlive();
       } else {
         // --- REANUDAR ---
         console.log(
@@ -2014,6 +2072,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           // Por ahora, solo actualizamos el botón y el estado interno
           if (playPauseBtn) playPauseBtn.textContent = "❚❚";
         }
+        if (currentPlayer === spotifyPlayer) startSpotifyKeepAlive();
         timeRemainingOnPause = null; // Resetear tiempo guardado
       }
     } catch (error) {
