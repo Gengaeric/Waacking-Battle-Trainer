@@ -1156,8 +1156,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
       if (isSessionActive) requestWakeLock(false);
-      keepSpotifyPlaybackActive("visible");
-      if (isSpotifySessionActive() && !isPaused) startSpotifyKeepAlive();
+      stopSpotifyKeepAlive();
+      if (isSpotifySessionActive() && !isPaused) {
+        keepSpotifyPlaybackActive("visible");
+      }
     } else if (isSpotifySessionActive() && !isPaused) {
       keepSpotifyPlaybackActive("hidden");
       startSpotifyKeepAlive();
@@ -1244,8 +1246,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       welcomeMessageDiv.style.display = "none"; // Ocultar bienvenida si estaba visible
     if (playerControls) playerControls.style.display = "flex"; // Mostrar controles
 
-    if (song.type === "spotify") startSpotifyKeepAlive();
-    else stopSpotifyKeepAlive();
+    if (song.type === "spotify" && document.visibilityState !== "visible") {
+      startSpotifyKeepAlive();
+    } else {
+      stopSpotifyKeepAlive();
+    }
 
     // Reproducir según tipo
     try {
@@ -1291,6 +1296,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!isSpotifySessionActive() || isPaused) return;
     const accessToken = localStorage.getItem("spotify_access_token");
     if (!accessToken) return;
+    let playerState = null;
+    if (spotifyPlayer && typeof spotifyPlayer.getCurrentState === "function") {
+      try {
+        playerState = await spotifyPlayer.getCurrentState();
+      } catch (e) {
+        console.warn("[Spotify KeepAlive] Error obteniendo estado:", e);
+      }
+    }
+    if (playerState && !playerState.paused) {
+      console.log(
+        `[Spotify KeepAlive] Reproducción activa, sin intervención (${reason}).`,
+      );
+      return;
+    }
     if (!spotifyDeviceId) {
       initializeSpotifyPlayer(accessToken);
       await waitForSpotifyDevice(3000);
@@ -1298,7 +1317,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!spotifyDeviceId) return;
     console.log(`[Spotify KeepAlive] Manteniendo reproducción (${reason}).`);
     await transferPlayback(spotifyDeviceId, true);
-    if (spotifyPlayer && typeof spotifyPlayer.resume === "function") {
+    if (
+      spotifyPlayer &&
+      typeof spotifyPlayer.resume === "function" &&
+      (!playerState || playerState.paused)
+    ) {
       try {
         await spotifyPlayer.resume();
       } catch (e) {
@@ -1309,6 +1332,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function startSpotifyKeepAlive() {
     if (spotifyKeepAliveInterval) return;
+    if (document.visibilityState === "visible") return;
     spotifyKeepAliveInterval = setInterval(() => {
       keepSpotifyPlaybackActive("interval");
     }, 25000);
@@ -1333,10 +1357,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
       const fileURL = URL.createObjectURL(record.file);
+      audio.preload = "auto";
       audio.src = fileURL;
+      audio.load();
+
       audio.onloadedmetadata = () => {
         const startTime = calculateStartTime(audio.duration);
         audio.currentTime = startTime;
+      };
+
+      let hasStartedPlayback = false;
+      const startPlayback = () => {
+        if (hasStartedPlayback) return;
+        hasStartedPlayback = true;
         fadeIn(audio);
         audio.play().catch((error) => {
           console.error(error);
@@ -1345,8 +1378,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         playPauseBtn.textContent = "❚❚";
         isPaused = false;
         startRoundTimers(sessionConfig.duration);
-        audio.onend = () => URL.revokeObjectURL(fileURL); // Limpiar memoria
       };
+
+      audio.addEventListener("canplaythrough", startPlayback, { once: true });
+      audio.addEventListener("canplay", startPlayback, { once: true });
+      audio.addEventListener(
+        "ended",
+        () => {
+          URL.revokeObjectURL(fileURL);
+        },
+        { once: true },
+      );
     } catch (error) {
       console.error("Error al reproducir MP3 desde DB:", error);
       showToast("Error al reproducir el MP3.", "error");
