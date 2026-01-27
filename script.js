@@ -72,6 +72,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   let countdownTimeoutId = null;
   let roundEndTime = null;
   let timeRemainingOnPause = null;
+  let transitionGuardInterval = null;
+  let pendingNextTrackAt = null;
   let hasShownYoutubeWarning = false;
   let wakeLock = null;
   let spotifyKeepAliveInterval = null;
@@ -910,6 +912,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     clearTimeout(countdownTimeoutId);
     clearInterval(fadeInterval);
     clearInterval(fadeInInterval);
+    clearInterval(transitionGuardInterval);
     roundTimeout = null;
     gapTimeout = null;
     countdownStartTimeout = null;
@@ -918,6 +921,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     countdownTimeoutId = null;
     fadeInterval = null;
     fadeInInterval = null;
+    transitionGuardInterval = null;
+    pendingNextTrackAt = null;
   };
   async function prepareForNewPlaylist() {
     if (isSessionActive) await endSession();
@@ -1653,6 +1658,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       clearInterval(fadeInInterval);
     }
   }
+  function startTransitionGuard() {
+    if (transitionGuardInterval) return;
+    transitionGuardInterval = setInterval(() => {
+      if (!isSessionActive || isPaused || pendingNextTrackAt === null) return;
+      if (Date.now() >= pendingNextTrackAt) {
+        console.log(
+          "[App Timers] Guard de transición detectó fin del gap.",
+        );
+        pendingNextTrackAt = null;
+        clearInterval(transitionGuardInterval);
+        transitionGuardInterval = null;
+        if (isSessionActive) playNextTrack();
+      }
+    }, 1000);
+  }
   function startRoundTimers(
     durationInSeconds,
     trackTotalDurationSeconds = null,
@@ -1686,6 +1706,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     roundEndTime = Date.now() + roundDurationMs;
     timeRemainingOnPause = null;
+    pendingNextTrackAt = roundEndTime + gapDurationMs;
+    startTransitionGuard();
 
     const fadeOutStartTime = Math.max(roundDurationMs - fadeDurationMs, 0);
     const countdownSeconds = Math.min(
