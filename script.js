@@ -1333,10 +1333,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
       const fileURL = URL.createObjectURL(record.file);
+      audio.preload = "auto";
       audio.src = fileURL;
+      audio.load();
+
       audio.onloadedmetadata = () => {
         const startTime = calculateStartTime(audio.duration);
         audio.currentTime = startTime;
+      };
+
+      let hasStartedPlayback = false;
+      const startPlayback = () => {
+        if (hasStartedPlayback) return;
+        hasStartedPlayback = true;
         fadeIn(audio);
         audio.play().catch((error) => {
           console.error(error);
@@ -1345,8 +1354,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         playPauseBtn.textContent = "❚❚";
         isPaused = false;
         startRoundTimers(sessionConfig.duration);
-        audio.onend = () => URL.revokeObjectURL(fileURL); // Limpiar memoria
       };
+
+      audio.addEventListener("canplaythrough", startPlayback, { once: true });
+      audio.addEventListener("canplay", startPlayback, { once: true });
+      audio.addEventListener(
+        "ended",
+        () => {
+          URL.revokeObjectURL(fileURL);
+        },
+        { once: true },
+      );
     } catch (error) {
       console.error("Error al reproducir MP3 desde DB:", error);
       showToast("Error al reproducir el MP3.", "error");
