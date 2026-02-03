@@ -1510,13 +1510,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const match = url.match(regExp);
     return match ? match[1] : null;
   }
-  clearPlaylistBtn.addEventListener("click", () => {
-    if (confirm(t("confirmClearPlaylist"))) {
-      playlistsBySource[currentPlaylistSource] = [];
-      playlist = playlistsBySource[currentPlaylistSource];
-      updatePlaylistUI();
-    }
-  });
+  if (clearPlaylistBtn) {
+    clearPlaylistBtn.addEventListener("click", () => {
+      if (confirm(t("confirmClearPlaylist"))) {
+        playlistsBySource[currentPlaylistSource] = [];
+        playlist = playlistsBySource[currentPlaylistSource];
+        updatePlaylistUI();
+      }
+    });
+  }
   function getPlaylistDisplayOrder() {
     if (
       isSessionActive &&
@@ -1615,6 +1617,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     updatePlaylistStatus();
   }
   function savePlaylist() {
+    if (!playlistNameInput) return;
     const name = playlistNameInput.value.trim();
     if (!name) {
       showToast(t("toastPlaylistNameMissing"));
@@ -1630,6 +1633,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     loadSavedPlaylists();
   }
   function loadSavedPlaylists() {
+    if (!savedPlaylistsSelect) return;
     savedPlaylistsSelect.innerHTML = `<option value="">${t(
       "loadPlaylistOption",
     )}</option>`;
@@ -1645,6 +1649,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
   async function loadSelectedPlaylist() {
+    if (!savedPlaylistsSelect) return;
     const key = savedPlaylistsSelect.value;
     if (!key) return;
     const savedPlaylist = JSON.parse(localStorage.getItem(key));
@@ -1657,6 +1662,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
   function deleteSelectedPlaylist() {
+    if (!savedPlaylistsSelect) return;
     const key = savedPlaylistsSelect.value;
     if (!key) {
       showToast(t("toastPlaylistSelectToDelete"));
@@ -1675,9 +1681,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
   }
-  savePlaylistBtn.addEventListener("click", savePlaylist);
-  savedPlaylistsSelect.addEventListener("change", loadSelectedPlaylist);
-  deletePlaylistBtn.addEventListener("click", deleteSelectedPlaylist);
+  if (savePlaylistBtn) {
+    savePlaylistBtn.addEventListener("click", savePlaylist);
+  }
+  if (savedPlaylistsSelect) {
+    savedPlaylistsSelect.addEventListener("change", loadSelectedPlaylist);
+  }
+  if (deletePlaylistBtn) {
+    deletePlaylistBtn.addEventListener("click", deleteSelectedPlaylist);
+  }
   if (playlistSourceSelect) {
     playlistSourceSelect.addEventListener("change", (event) => {
       setCurrentPlaylistSource(event.target.value);
