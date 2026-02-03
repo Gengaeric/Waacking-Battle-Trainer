@@ -235,7 +235,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       infoPresentation: "Presentation",
       infoTutorial: "How to use",
       infoContact: "Contact",
-      myPlaylists: "My Playlists",
+      myPlaylists: "Load playlist",
       loadPlaylistOption: "Load a playlist...",
       deleteSelectedPlaylist: "Delete Selected Playlist",
       buildEditPlaylist: "Build / Edit Playlist",
