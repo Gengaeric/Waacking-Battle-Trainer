@@ -15,8 +15,10 @@
             Whacking Battle Trainer
         </h1>
         <div class="language-switcher" aria-label="Selector de idioma">
-            <button class="language-btn" type="button" data-lang="es" aria-label="Español">🇦🇷</button>
-            <button class="language-btn" type="button" data-lang="en" aria-label="English">🇬🇧</button>
+            <div class="language-group">
+                <button class="language-btn" type="button" data-lang="es" aria-label="Español">🇦🇷</button>
+                <button class="language-btn" type="button" data-lang="en" aria-label="English">🇬🇧</button>
+            </div>
             <button id="restart-app-btn" class="restart-btn" type="button" data-i18n="restartApp" aria-label="Reiniciar app">Reiniciar app</button>
         </div>
         <section class="info-panel">
@@ -37,11 +39,14 @@
                     <button id="connect-spotify-btn" class="button" data-i18n="connectSpotify">Conectar con Spotify</button>
                 </div>
                 <div class="playlist-source-selector">
-                    <label for="playlist-source-select" data-i18n="currentPlaylistSource">Origen de la playlist actual (elige el correcto para que funcione)</label>
+                    <label for="playlist-source-select" data-i18n="currentPlaylistSource">Origen de la playlist actual</label>
                     <select id="playlist-source-select">
                         <option value="spotify" data-i18n="playlistSourceSpotify">Spotify</option>
                         <option value="youtube" data-i18n="playlistSourceYoutube">YouTube</option>
                     </select>
+                    <p class="config-helper" data-i18n="currentPlaylistSourceHelper">
+                        Elige el correcto para que funcione.
+                    </p>
                 </div>
                 <button id="toggle-playlist-btn" class="button secondary" data-i18n="showList">Mostrar Lista (0)</button>
                 <ul id="playlist-ul"></ul>

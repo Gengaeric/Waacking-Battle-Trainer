@@ -12,9 +12,16 @@ body {
 .app-container { width: 100%; max-width: 1400px; padding: 20px; box-sizing: border-box; }
 .language-switcher {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
     gap: 8px;
     margin-bottom: 10px;
+    width: 100%;
+}
+.language-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 .language-btn {
     border: 1px solid var(--border-color);
@@ -37,7 +44,8 @@ body {
 }
 .restart-btn {
     border: 1px solid var(--border-color);
-    background-color: #2a2a2a;
+    background-color: #333;
+    color: var(--text-color);
     border-radius: 999px;
     padding: 4px 12px;
     font-size: 12px;
@@ -213,7 +221,7 @@ hr { border: none; border-top: 1px solid var(--border-color); margin: 15px 0; wi
     .panel { overflow-y: auto; /* Añadir scroll a paneles si es necesario */ } /* Permitir scroll vertical EN PANELES */
     .main-title { font-size: 1.5rem; justify-content: center; /* Centrar título */ }
     .title-logo { height: 40px; width: 40px; }
-    .language-switcher { justify-content: center; }
+    .language-switcher { justify-content: space-between; }
     #countdown-display { font-size: 5rem; }
     .info-panel { flex-direction: column; }
     .playlist-buttons label, .playlist-buttons button { padding: 12px 15px; /* Más padding en móvil */ }
