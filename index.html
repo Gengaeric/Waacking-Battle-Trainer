@@ -35,9 +35,16 @@
                 <div class="playlist-buttons">
                     <label for="add-mp3-input" class="button" style="display: none;" data-i18n="addMp3">Añadir Archivos MP3</label>
                     <input type="file" id="add-mp3-input" multiple accept="audio/*" style="display: none;">
-                    <button id="add-youtube-btn" class="button" style="display: none;" data-i18n="addYoutube">Añadir desde YouTube</button>
+                    <button id="add-youtube-btn" class="button" data-i18n="addYoutube">Añadir desde YouTube</button>
                     <button id="add-spotify-playlist-btn" class="button" data-i18n="addSpotifyPlaylist">Añadir Playlist Spotify (Link)</button>
                     <button id="connect-spotify-btn" class="button" data-i18n="connectSpotify">Conectar con Spotify</button>
+                </div>
+                <div class="playlist-source-selector">
+                    <label for="playlist-source-select" data-i18n="currentPlaylistSource">Lista actual</label>
+                    <select id="playlist-source-select">
+                        <option value="spotify" data-i18n="playlistSourceSpotify">Spotify</option>
+                        <option value="youtube" data-i18n="playlistSourceYoutube">YouTube</option>
+                    </select>
                 </div>
                 <div class="current-playlist-management">
                     <h4 data-i18n="currentPlaylistManagement">Gestión de la Lista Actual</h4>
@@ -189,6 +196,7 @@
     <audio id="sfx-player"></audio>
 
     <script src="https://unpkg.com/dexie@3/dist/dexie.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script src="script.js"></script> <script src="https://sdk.scdn.co/spotify-player.js"></script>
 
     <script>

@@ -50,6 +50,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const infoBtns = document.querySelectorAll(".info-btn");
   const closeBtns = document.querySelectorAll(".close-modal-btn");
   const languageButtons = document.querySelectorAll(".language-btn");
+  const playlistSourceSelect = document.getElementById(
+    "playlist-source-select",
+  );
 
   const translations = {
     es: {
@@ -64,16 +67,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       addYoutube: "Añadir desde YouTube",
       addSpotifyPlaylist: "Añadir Playlist Spotify (Link)",
       connectSpotify: "Conectar con Spotify",
+      currentPlaylistSource: "Lista actual",
+      playlistSourceSpotify: "Spotify",
+      playlistSourceYoutube: "YouTube",
       currentPlaylistManagement: "Gestión de la Lista Actual",
       playlistNamePlaceholder: "Nombre para guardar",
       save: "Guardar",
-      clearList: "Vaciar Lista",
-      showList: "Mostrar Lista",
-      hideList: "Ocultar Lista",
+      clearList: "Vaciar Lista Actual",
+      showList: "Mostrar Lista Actual",
+      hideList: "Ocultar Lista Actual",
       connectedAs: "Conectado como:",
       disconnect: "Desconectar",
       welcomeTitle: "¡Bienvenidxs!",
-      welcomeText: "Conecta tu cuenta y añade playlists de Spotify para empezar.",
+      welcomeText:
+        "Conecta tu cuenta y añade playlists de Spotify o YouTube para empezar.",
       welcomeHint: "Usa los botones de arriba para ver la presentación y el tutorial.",
       toggleVideoTitle: "Mostrar/Ocultar video",
       configTitle: "Configuración",
@@ -125,7 +132,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       tutorialIntro:
         "Esta app está diseñada para que sus entrenamientos sean fluidos y enfocados. Aquí te explicamos cómo funciona:",
       tutorialStep1:
-        '<strong>Carga tu Música:</strong> Presiona "Añadir Playlist Spotify (Link)" y pega el enlace de la playlist que quieras usar. Necesitarás conectar tu cuenta de Spotify primero.',
+        '<strong>Carga tu Música:</strong> Presiona "Añadir Playlist Spotify (Link)" o "Añadir desde YouTube" y pega el enlace que quieras usar. Necesitarás conectar tu cuenta de Spotify primero.',
       tutorialStep2:
         '<strong>Guarda tu Playlist (Opcional):</strong> Si te gustó la lista que armaste, ponele un nombre claro en el campo de "Nombre para guardar" y presioná "Guardar". La próxima vez, podrás cargarla al instante desde el menú "Mis Playlists".',
       tutorialStep3:
@@ -235,17 +242,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       addYoutube: "Add from YouTube",
       addSpotifyPlaylist: "Add Spotify Playlist (Link)",
       connectSpotify: "Connect with Spotify",
+      currentPlaylistSource: "Current playlist",
+      playlistSourceSpotify: "Spotify",
+      playlistSourceYoutube: "YouTube",
       currentPlaylistManagement: "Current Playlist Management",
       playlistNamePlaceholder: "Name to save",
       save: "Save",
-      clearList: "Clear List",
-      showList: "Show List",
-      hideList: "Hide List",
+      clearList: "Clear Current List",
+      showList: "Show Current List",
+      hideList: "Hide Current List",
       connectedAs: "Connected as:",
       disconnect: "Disconnect",
       welcomeTitle: "Welcome!",
       welcomeText:
-        "Connect your account and add Spotify playlists to get started.",
+        "Connect your account and add Spotify or YouTube playlists to get started.",
       welcomeHint: "Use the buttons above to view the presentation and guide.",
       toggleVideoTitle: "Show/Hide video",
       configTitle: "Settings",
@@ -297,7 +307,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       tutorialIntro:
         "This app is designed to keep your training smooth and focused. Here’s how it works:",
       tutorialStep1:
-        '<strong>Load your music:</strong> Press "Add Spotify Playlist (Link)" and paste the playlist URL you want to use. You’ll need to connect your Spotify account first.',
+        '<strong>Load your music:</strong> Press "Add Spotify Playlist (Link)" or "Add from YouTube" and paste the URL you want to use. You’ll need to connect your Spotify account first.',
       tutorialStep2:
         '<strong>Save your playlist (Optional):</strong> If you like the list you built, give it a clear name in the "Name to save" field and press "Save". Next time, you can load it instantly from "My Playlists".',
       tutorialStep3:
@@ -435,7 +445,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   // --- Variables de Estado ---
-  let playlist = [];
+  const playlistsBySource = {
+    spotify: [],
+    youtube: [],
+    mp3: [],
+  };
+  let currentPlaylistSource = "spotify";
+  let playlist = playlistsBySource[currentPlaylistSource];
   let currentTrackIndex = 0;
   let playbackOrder = [];
   let currentOrderPosition = 0;
@@ -1179,8 +1195,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       } // Fin while
       if (allTracks.length > 0) {
-        await prepareForNewPlaylist();
-        playlist = allTracks;
+        await prepareForNewPlaylist("spotify");
+        playlistsBySource.spotify = allTracks;
+        playlist = playlistsBySource.spotify;
         updatePlaylistUI();
         showToast(
           t("toastSpotifyLoadedPlaylist", { count: allTracks.length }),
@@ -1359,14 +1376,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     transitionGuardInterval = null;
     pendingNextTrackAt = null;
   };
-  async function prepareForNewPlaylist() {
+  function setCurrentPlaylistSource(source, { updateUI = true } = {}) {
+    if (!playlistsBySource[source]) return;
+    currentPlaylistSource = source;
+    playlist = playlistsBySource[source];
+    if (playlistSourceSelect && playlistSourceSelect.value !== source) {
+      playlistSourceSelect.value = source;
+    }
+    if (updateUI) {
+      updatePlaylistUI();
+      updatePlaylistStatus();
+    }
+  }
+
+  function inferPlaylistSource(items = []) {
+    if (items.some((item) => item.type === "spotify")) return "spotify";
+    if (items.some((item) => item.type === "youtube")) return "youtube";
+    if (items.some((item) => item.type === "mp3")) return "mp3";
+    return "spotify";
+  }
+
+  async function prepareForNewPlaylist(source = currentPlaylistSource) {
     if (isSessionActive) await endSession();
-    playlist = [];
+    if (source !== currentPlaylistSource) {
+      setCurrentPlaylistSource(source, { updateUI: false });
+    }
+    playlistsBySource[source] = [];
+    playlist = playlistsBySource[source];
     updatePlaylistUI();
   }
 
   addMp3Input.addEventListener("change", async (e) => {
-    await prepareForNewPlaylist();
+    await prepareForNewPlaylist("mp3");
     showToast(t("toastMp3Saving"), "info");
     try {
       for (const file of e.target.files) {
@@ -1402,7 +1443,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   addYoutubeBtn.addEventListener("click", async () => {
     const url = prompt(t("promptYoutubeUrl"));
     if (!url) return;
-    await prepareForNewPlaylist();
+    await prepareForNewPlaylist("youtube");
     showToast(t("toastYoutubeLoading"), "info");
     if (YOUTUBE_API_KEY === "AQUI_VA_TU_CLAVE_DE_API" || !YOUTUBE_API_KEY) {
       showToast(t("toastYoutubeApiMissing"), "error");
@@ -1471,7 +1512,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   clearPlaylistBtn.addEventListener("click", () => {
     if (confirm(t("confirmClearPlaylist"))) {
-      playlist = [];
+      playlistsBySource[currentPlaylistSource] = [];
+      playlist = playlistsBySource[currentPlaylistSource];
       updatePlaylistUI();
     }
   });
@@ -1605,10 +1647,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function loadSelectedPlaylist() {
     const key = savedPlaylistsSelect.value;
     if (!key) return;
-    await prepareForNewPlaylist();
     const savedPlaylist = JSON.parse(localStorage.getItem(key));
     if (savedPlaylist) {
-      playlist = savedPlaylist;
+      const source = inferPlaylistSource(savedPlaylist);
+      await prepareForNewPlaylist(source);
+      playlistsBySource[source] = savedPlaylist;
+      playlist = playlistsBySource[source];
       updatePlaylistUI();
     }
   }
@@ -1621,7 +1665,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const playlistName = key.replace("playlist_", "");
     if (confirm(t("confirmDeletePlaylist", { name: playlistName }))) {
       localStorage.removeItem(key);
-      playlist = [];
+      playlistsBySource[currentPlaylistSource] = [];
+      playlist = playlistsBySource[currentPlaylistSource];
       updatePlaylistUI();
       loadSavedPlaylists();
       if (isSessionActive) {
@@ -1633,6 +1678,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   savePlaylistBtn.addEventListener("click", savePlaylist);
   savedPlaylistsSelect.addEventListener("change", loadSelectedPlaylist);
   deletePlaylistBtn.addEventListener("click", deleteSelectedPlaylist);
+  if (playlistSourceSelect) {
+    playlistSourceSelect.addEventListener("change", (event) => {
+      setCurrentPlaylistSource(event.target.value);
+    });
+  }
   togglePlaylistBtn.addEventListener("click", () => {
     playlistUl.classList.toggle("visible");
     const buttonText = playlistUl.classList.contains("visible")
@@ -1644,6 +1694,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   function initializeApp() {
     endSessionBtn.style.display = "none";
     loadSavedPlaylists();
+    if (playlistSourceSelect) {
+      playlistSourceSelect.value = currentPlaylistSource;
+    }
     updatePlaylistStatus();
   }
 
