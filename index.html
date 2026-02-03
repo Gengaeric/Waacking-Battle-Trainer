@@ -84,6 +84,13 @@
                    </div>
                </div>
                <div class="config-group">
+                   <label>¿Entreno con alguien?</label>
+                   <div class="btn-group">
+                       <button id="train-partner-no" class="config-btn active">No</button>
+                       <button id="train-partner-yes" class="config-btn">Sí</button>
+                   </div>
+               </div>
+               <div class="config-group">
                    <label for="segment-select">Segmento de Canción</label>
                    <select id="segment-select">
                        <option value="principio">Principio</option>
@@ -91,6 +98,9 @@
                        <option value="final">Final</option>
                        <option value="azar">Azar</option>
                    </select>
+                   <p class="config-helper">
+                       En modo “Sí”, el segmento se reproduce dos veces antes de pasar al siguiente tema.
+                   </p>
                </div>
                <div class="config-group">
                    <label>Orden de Reproducción</label>
@@ -126,6 +136,7 @@
                      <li><b>Transiciones de DJ (Fade-In & Out):</b> La música no te sorprende. Sube y baja suavemente al inicio y final de cada round, dándote tiempo para empezar y terminar tu fraseo sin cortes bruscos.</li>
                      <li><b>Entrenamiento por Segmentos:</b> ¿Siempre bailás los mismos 30 segundos de cada tema? Con las opciones de "Principio", "Medio" y "Final", podés forzarte a entrenar con diferentes partes de las canciones.</li>
                      <li><b>Modo Azar Inteligente:</b> La opción "Azar" está diseñada para respetar la musicalidad. En vez de empezar en un segundo cualquiera, el sistema lo ajusta para que coincida con la estructura de la música. La mayoría de temas funk y disco de Whacking tienen un tempo ~120 BPM. Esto permite que haya más posibilidades de que la canción arranque en el "1", el inicio de una frase musical, para que tu entrada sea siempre potente.</li>
+                     <li><b>Respuesta Instantánea (¿Entreno con alguien?):</b> Si activás “Sí”, cada canción suena en dos segmentos seguidos. Después del primer conteo de 5 beeps, la música sigue sin fade-out para que la otra persona responda al instante. Al terminar el segundo segmento, vuelven los beeps, hay fade-out y recién ahí se cambia de tema. Esto recrea la autenticidad de una batalla real.</li>
                      <li><b>Cero Interrupciones (Pantalla Activa):</b> Al iniciar una sesión, la app evita que la pantalla de tu celular se apague. Tu única misión es bailar, sin tocar nada.</li>
                      <li><b>Flujo Ininterrumpido (Anti-Errores):</b> ¿Un video de YouTube está protegido? La app te avisará con una notificación que no detiene la música y <strong>saltará automáticamente al siguiente tema</strong>. El ritmo nunca para.</li>
                  </ul>

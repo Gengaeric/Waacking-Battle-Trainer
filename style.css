@@ -118,6 +118,7 @@ label[for="add-mp3-input"] { display: block; /* O inline-block si prefieres */ }
 .control-btn { font-size: 2rem; background: none; border: none; color: var(--text-color); cursor: pointer; padding: 0 10px; }
 .play-btn { font-size: 3rem; color: var(--primary-color); }
 .config-group { display: flex; flex-direction: column; gap: 8px; }
+.config-helper { font-size: 0.85rem; color: #b8b8b8; margin: 0; }
 .btn-group { display: flex; gap: 10px; }
 .config-btn.active { background-color: var(--primary-color); color: var(--bg-color); font-weight: bold; }
 .session-buttons { display: flex; flex-direction: column; gap: 10px; margin-top: auto; /* Empujar al fondo */ }
