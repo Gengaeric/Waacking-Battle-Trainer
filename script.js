@@ -59,13 +59,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       infoPresentation: "Presentación",
       infoTutorial: "Tutorial de uso",
       infoContact: "Contacto",
-      myPlaylists: "Mis Playlists",
+      myPlaylists: "Cargar playlist",
       loadPlaylistOption: "Cargar una playlist...",
       deleteSelectedPlaylist: "Borrar Playlist Seleccionada",
       buildEditPlaylist: "Armar / Editar Playlist",
       addMp3: "Añadir Archivos MP3",
       addYoutube: "Añadir desde YouTube",
-      addSpotifyPlaylist: "Añadir Playlist Spotify (Link)",
+      addSpotifyPlaylist: "Añadir desde Spotify",
       connectSpotify: "Conectar con Spotify",
       currentPlaylistSource: "Lista actual",
       playlistSourceSpotify: "Spotify",
@@ -132,9 +132,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       tutorialIntro:
         "Esta app está diseñada para que sus entrenamientos sean fluidos y enfocados. Aquí te explicamos cómo funciona:",
       tutorialStep1:
-        '<strong>Carga tu Música:</strong> Presiona "Añadir Playlist Spotify (Link)" o "Añadir desde YouTube" y pega el enlace que quieras usar. Necesitarás conectar tu cuenta de Spotify primero.',
+        '<strong>Carga tu Música:</strong> Presiona "Añadir desde Spotify" o "Añadir desde YouTube" y pega el enlace que quieras usar. Necesitarás conectar tu cuenta de Spotify primero.',
       tutorialStep2:
-        '<strong>Guarda tu Playlist (Opcional):</strong> Si te gustó la lista que armaste, ponele un nombre claro en el campo de "Nombre para guardar" y presioná "Guardar". La próxima vez, podrás cargarla al instante desde el menú "Mis Playlists".',
+        '<strong>Guarda tu Playlist (Opcional):</strong> Si te gustó la lista que armaste, ponele un nombre claro en el campo de "Nombre para guardar" y presioná "Guardar". La próxima vez, podrás cargarla al instante desde el menú "Cargar playlist".',
       tutorialStep3:
         '<strong>Configura tu Sesión y ¡a Bailar!:</strong> En el panel de Configuración, ajusta tu sesión. Cuando esté todo listo, ¡presioná "¡COMENZAR SESIÓN!".',
       tutorialTroubleshoot: "Solución a problemas comunes",
