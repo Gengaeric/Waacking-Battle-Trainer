@@ -42,6 +42,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
   const toggleVideoBtn = document.getElementById("toggle-video-btn");
   const togglePlaylistBtn = document.getElementById("toggle-playlist-btn");
+  const playlistProgress = document.getElementById("playlist-progress");
+  const sessionTimer = document.getElementById("session-timer");
   const modalOverlay = document.getElementById("modal-overlay");
   const infoBtns = document.querySelectorAll(".info-btn");
   const closeBtns = document.querySelectorAll(".close-modal-btn");
@@ -51,6 +53,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   let currentTrackIndex = 0;
   let playbackOrder = [];
   let currentOrderPosition = 0;
+  let sessionStartTimestamp = null;
+  let sessionElapsedMs = 0;
+  let sessionTimerInterval = null;
   let sessionConfig = {
     duration: 40,
     segment: "principio",
@@ -1042,12 +1047,77 @@ document.addEventListener("DOMContentLoaded", async () => {
       updatePlaylistUI();
     }
   });
+  function getPlaylistDisplayOrder() {
+    if (
+      isSessionActive &&
+      sessionConfig.order === "random" &&
+      playbackOrder.length === playlist.length
+    ) {
+      return playbackOrder;
+    }
+    return playlist.map((_, index) => index);
+  }
+  function formatSessionTime(totalMs) {
+    const totalSeconds = Math.floor(totalMs / 1000);
+    const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    return `${minutes}:${seconds}`;
+  }
+  function updateSessionTimerDisplay() {
+    if (!sessionTimer) return;
+    const elapsed =
+      sessionStartTimestamp != null
+        ? sessionElapsedMs + (Date.now() - sessionStartTimestamp)
+        : sessionElapsedMs;
+    sessionTimer.textContent = formatSessionTime(elapsed);
+  }
+  function startSessionTimer() {
+    if (sessionTimerInterval) return;
+    sessionStartTimestamp = Date.now();
+    updateSessionTimerDisplay();
+    sessionTimerInterval = setInterval(updateSessionTimerDisplay, 1000);
+  }
+  function stopSessionTimer() {
+    if (sessionTimerInterval) {
+      clearInterval(sessionTimerInterval);
+      sessionTimerInterval = null;
+    }
+    if (sessionStartTimestamp != null) {
+      sessionElapsedMs += Date.now() - sessionStartTimestamp;
+      sessionStartTimestamp = null;
+    }
+    updateSessionTimerDisplay();
+  }
+  function resetSessionTimer() {
+    if (sessionTimerInterval) {
+      clearInterval(sessionTimerInterval);
+      sessionTimerInterval = null;
+    }
+    sessionStartTimestamp = null;
+    sessionElapsedMs = 0;
+    updateSessionTimerDisplay();
+  }
+  function updatePlaylistStatus() {
+    if (!playlistProgress) return;
+    const total = playlist.length;
+    let playedCount = 0;
+    if (isSessionActive && total > 0 && playbackOrder.length === total) {
+      playedCount = Math.min(Math.max(currentOrderPosition + 1, 0), total);
+    }
+    playlistProgress.textContent = `${playedCount}/${total}`;
+    updateSessionTimerDisplay();
+  }
   function updatePlaylistUI() {
     playlistUl.innerHTML = "";
-    playlist.forEach((song, index) => {
+    const displayOrder = getPlaylistDisplayOrder();
+    displayOrder.forEach((songIndex) => {
+      const song = playlist[songIndex];
       const li = document.createElement("li");
-      li.dataset.index = index;
-      li.draggable = true;
+      li.dataset.index = songIndex;
+      li.draggable = !isSessionActive;
+      if (isSessionActive && songIndex === currentTrackIndex) {
+        li.classList.add("is-playing");
+      }
       const typeSpan = document.createElement("span");
       typeSpan.className = `track-type ${song.type}`;
       typeSpan.textContent = song.type.toUpperCase();
@@ -1058,7 +1128,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       deleteBtn.className = "delete-btn";
       deleteBtn.onclick = (e) => {
         e.stopPropagation();
-        playlist.splice(index, 1);
+        playlist.splice(songIndex, 1);
         updatePlaylistUI();
       };
       li.appendChild(typeSpan);
@@ -1070,6 +1140,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       ? "Ocultar Lista"
       : "Mostrar Lista";
     togglePlaylistBtn.textContent = `${buttonText} (${playlist.length})`;
+    updatePlaylistStatus();
   }
   function savePlaylist() {
     const name = playlistNameInput.value.trim();
@@ -1142,6 +1213,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   function initializeApp() {
     endSessionBtn.style.display = "none";
     loadSavedPlaylists();
+    updatePlaylistStatus();
   }
 
   const requestWakeLock = async (showNotification = true) => {
@@ -1192,6 +1264,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     currentOrderPosition = 0;
     const firstIndex = playbackOrder[0] ?? 0;
     currentTrackIndex = firstIndex;
+    resetSessionTimer();
+    startSessionTimer();
     playerPanel.classList.add("session-active");
     endSessionBtn.style.display = "block";
     playTrack(firstIndex);
@@ -1234,6 +1308,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const orderPos = playbackOrder.indexOf(index);
     if (orderPos !== -1) currentOrderPosition = orderPos;
     const song = playlist[index];
+    updatePlaylistUI();
     console.log(
       `[App Logic] Reproduciendo [${index}]: ${song.name} (${song.type})`,
     );
@@ -1987,6 +2062,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     isPaused = true;
     playbackOrder = [];
     currentOrderPosition = 0;
+    stopSessionTimer();
 
     if (wakeLock) {
       try {
@@ -2044,6 +2120,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (countdownDisplay) countdownDisplay.style.display = "none";
     if (countdownDisplay) countdownDisplay.classList.remove("final-seconds");
     hasShownYoutubeWarning = false; // Resetear aviso YT
+    resetSessionTimer();
+    updatePlaylistUI();
 
     console.log("[App Logic] Sesión finalizada.");
   }
@@ -2083,6 +2161,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.log(
           `[App Controls] Pausando. Tiempo restante: ${timeRemainingOnPause}ms`,
         );
+        stopSessionTimer();
 
         // Pausar el reproductor específico
         if (currentPlayer === audio) {
@@ -2106,6 +2185,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.log(
           `[App Controls] Reanudando. Tiempo restante guardado: ${timeRemainingOnPause}ms`,
         );
+        startSessionTimer();
         // Reanudar el reproductor específico
         if (currentPlayer === audio) {
           await currentPlayer.play().catch((e) => {
