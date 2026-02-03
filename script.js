@@ -50,6 +50,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const infoBtns = document.querySelectorAll(".info-btn");
   const closeBtns = document.querySelectorAll(".close-modal-btn");
   const languageButtons = document.querySelectorAll(".language-btn");
+  const restartAppBtn = document.getElementById("restart-app-btn");
   const playlistSourceSelect = document.getElementById(
     "playlist-source-select",
   );
@@ -91,6 +92,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       trainingMode: "Modo de entrenamiento",
       trainingSolo: "Solitario",
       trainingPartner: "Con alguien",
+      restartApp: "Reiniciar app",
       songSegment: "Segmento de Canción",
       segmentStart: "Principio",
       segmentMiddle: "Medio",
@@ -267,6 +269,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       trainingMode: "Training mode",
       trainingSolo: "Solo",
       trainingPartner: "With someone",
+      restartApp: "Restart app",
       songSegment: "Song Segment",
       segmentStart: "Start",
       segmentMiddle: "Middle",
@@ -584,6 +587,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   languageButtons.forEach((btn) => {
     btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
   });
+  if (restartAppBtn) {
+    restartAppBtn.addEventListener("click", () => window.location.reload());
+  }
   setLanguage(currentLang);
   // PASO II
   // ================================================
@@ -1352,9 +1358,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 500);
   }
   function showToast(message, type = "error") {
+    const maxToasts = 4;
     const toast = document.createElement("div");
     toast.className = `toast ${type}`;
     toast.textContent = message;
+    while (toastContainer.children.length >= maxToasts) {
+      toastContainer.firstElementChild?.remove();
+    }
     toastContainer.appendChild(toast);
     setTimeout(() => toast.remove(), 5000);
   }
