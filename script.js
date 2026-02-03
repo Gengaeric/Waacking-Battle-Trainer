@@ -27,6 +27,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const duration60Btn = document.getElementById("duration-60");
   const orderSequentialBtn = document.getElementById("order-sequential");
   const orderRandomBtn = document.getElementById("order-random");
+  const trainPartnerNoBtn = document.getElementById("train-partner-no");
+  const trainPartnerYesBtn = document.getElementById("train-partner-yes");
   const segmentSelect = document.getElementById("segment-select");
   const gapInput = document.getElementById("gap-input");
   const addYoutubeBtn = document.getElementById("add-youtube-btn");
@@ -61,6 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     segment: "principio",
     gap: 3,
     order: "sequential",
+    trainWithPartner: false,
   };
   let isSessionActive = false;
   let isPaused = true;
@@ -82,6 +85,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   let hasShownYoutubeWarning = false;
   let wakeLock = null;
   let spotifyKeepAliveInterval = null;
+  let partnerSegmentIndex = 0;
+  let currentRoundOptions = null;
   // PASO I
   // --- NUEVAS VARIABLES PARA SPOTIFY ---
   let spotifyPlayer = null;
@@ -111,6 +116,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     currentOrderPosition = position;
     const nextIndex = playbackOrder[position];
     playTrack(nextIndex);
+  }
+
+  function getRequiredPlaybackDuration() {
+    const baseDuration = sessionConfig.duration || 40;
+    return sessionConfig.trainWithPartner ? baseDuration * 2 : baseDuration;
+  }
+
+  function startPartnerFollowUpSegment() {
+    if (!isSessionActive || !sessionConfig.trainWithPartner) return;
+    partnerSegmentIndex = 1;
+    startRoundTimers(sessionConfig.duration, null, { skipFadeIn: true });
+  }
+
+  function startTrackTimers(trackTotalDurationSeconds = null) {
+    partnerSegmentIndex = 0;
+    if (sessionConfig.trainWithPartner) {
+      startRoundTimers(sessionConfig.duration, trackTotalDurationSeconds, {
+        skipFadeOut: true,
+        scheduleNextTrack: false,
+        onSegmentComplete: startPartnerFollowUpSegment,
+      });
+      return;
+    }
+    startRoundTimers(sessionConfig.duration, trackTotalDurationSeconds);
   }
 
   function playNextTrack() {
@@ -1309,6 +1338,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     currentTrackIndex = index;
     const orderPos = playbackOrder.indexOf(index);
     if (orderPos !== -1) currentOrderPosition = orderPos;
+    partnerSegmentIndex = 0;
+    currentRoundOptions = null;
     const song = playlist[index];
     updatePlaylistUI();
     console.log(
@@ -1459,7 +1490,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
         playPauseBtn.textContent = "❚❚";
         isPaused = false;
-        startRoundTimers(sessionConfig.duration);
+        startTrackTimers();
       };
 
       audio.addEventListener("canplaythrough", startPlayback, { once: true });
@@ -1592,10 +1623,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log("[Spotify Play] Llamada API Play exitosa.");
       isPaused = false;
       if (playPauseBtn) playPauseBtn.textContent = "❚❚";
-      startRoundTimers(
-        sessionConfig.duration,
-        durationMs ? durationMs / 1000 : null,
-      ); // Pasar duración real a timers
+      startTrackTimers(durationMs ? durationMs / 1000 : null); // Pasar duración real a timers
     } catch (error) {
       console.error("[Spotify Play] Error GRANDE en playSpotifyTrack:", error);
       showToast(`Error Spotify: ${error.message}. Saltando...`, "error");
@@ -1625,7 +1653,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         fadeIn(ytPlayer);
         playPauseBtn.textContent = "❚❚";
         isPaused = false;
-        startRoundTimers(sessionConfig.duration);
+        startTrackTimers();
       }
     };
     ytPlayer.addEventListener("onStateChange", stateChangeHandler);
@@ -1634,11 +1662,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   function calculateStartTime(totalDuration) {
     let startTime = 0;
-    const effectiveDuration = sessionConfig.duration + 4;
+    const effectiveDuration = getRequiredPlaybackDuration() + 4;
     if (!totalDuration || totalDuration < effectiveDuration) return 0;
     switch (sessionConfig.segment) {
       case "medio":
-        startTime = totalDuration / 2 - sessionConfig.duration / 2;
+        startTime = totalDuration / 2 - getRequiredPlaybackDuration() / 2;
         break;
       case "final":
         startTime = totalDuration - effectiveDuration;
@@ -1753,9 +1781,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   function startRoundTimers(
     durationInSeconds,
     trackTotalDurationSeconds = null,
+    options = {},
   ) {
     // Añadir duración total opcional
     clearAllTimers();
+    const mergedOptions = {
+      skipFadeOut: false,
+      skipFadeIn: false,
+      scheduleNextTrack: true,
+      onSegmentComplete: null,
+      ...options,
+    };
+    currentRoundOptions = mergedOptions;
     const roundDurationMs =
       (durationInSeconds || sessionConfig.duration || 40) * 1000;
     const fadeDurationMs = Math.min(4000, roundDurationMs);
@@ -1774,7 +1811,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // --- FADE IN ---
     if (currentPlayer) {
-      fadeIn(currentPlayer); // Llamar fadeIn con el player correcto
+      if (!mergedOptions.skipFadeIn) {
+        fadeIn(currentPlayer); // Llamar fadeIn con el player correcto
+      }
     } else {
       console.warn(
         "[App Timers] startRoundTimers: No se pudo determinar currentPlayer para fadeIn.",
@@ -1783,8 +1822,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     roundEndTime = Date.now() + roundDurationMs;
     timeRemainingOnPause = null;
-    pendingNextTrackAt = roundEndTime + gapDurationMs;
-    startTransitionGuard();
+    if (mergedOptions.scheduleNextTrack) {
+      pendingNextTrackAt = roundEndTime + gapDurationMs;
+      startTransitionGuard();
+    } else {
+      pendingNextTrackAt = null;
+      if (transitionGuardInterval) {
+        clearInterval(transitionGuardInterval);
+        transitionGuardInterval = null;
+      }
+    }
 
     const fadeOutStartTime = Math.max(roundDurationMs - fadeDurationMs, 0);
     const countdownSeconds = Math.min(
@@ -2008,6 +2055,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (secondsLeft === 1) {
           countdownTimeoutId = null;
+          if (mergedOptions.skipFadeOut && mergedOptions.onSegmentComplete) {
+            mergedOptions.onSegmentComplete();
+            return;
+          }
           startFadeOut();
           return;
         }
@@ -2033,9 +2084,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       }, countdownStartDelay);
     }
 
-    roundTimeout = setTimeout(() => {
-      startFadeOut();
-    }, fadeOutStartTime + 50);
+    if (!mergedOptions.skipFadeOut) {
+      roundTimeout = setTimeout(() => {
+        startFadeOut();
+      }, fadeOutStartTime + 50);
+    }
   }
   function playSound(soundFile, volume = 1.0) {
     if (!sfxPlayer || !soundFile) return;
@@ -2064,6 +2117,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     isPaused = true;
     playbackOrder = [];
     currentOrderPosition = 0;
+    partnerSegmentIndex = 0;
+    currentRoundOptions = null;
     stopSessionTimer();
 
     if (wakeLock) {
@@ -2208,7 +2263,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Reiniciar timers SOLO si había tiempo restante válido
         if (timeRemainingOnPause !== null && timeRemainingOnPause > 0) {
-          startRoundTimers(timeRemainingOnPause / 1000); // Reiniciar con tiempo restante en segundos
+          startRoundTimers(
+            timeRemainingOnPause / 1000,
+            null,
+            currentRoundOptions || {},
+          ); // Reiniciar con tiempo restante en segundos
         } else {
           console.warn(
             "[App Controls] Reanudado sin tiempo restante válido o expirado. Iniciando track de nuevo?",
@@ -2250,6 +2309,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     duration40Btn.classList.remove("active");
     console.log("[App Config] Duración cambiada a 60s.");
   });
+  if (trainPartnerNoBtn && trainPartnerYesBtn) {
+    trainPartnerNoBtn.addEventListener("click", () => {
+      sessionConfig.trainWithPartner = false;
+      trainPartnerNoBtn.classList.add("active");
+      trainPartnerYesBtn.classList.remove("active");
+    });
+    trainPartnerYesBtn.addEventListener("click", () => {
+      sessionConfig.trainWithPartner = true;
+      trainPartnerYesBtn.classList.add("active");
+      trainPartnerNoBtn.classList.remove("active");
+    });
+  } else {
+    console.warn("[App Init] Botones de entrenamiento no encontrados en el DOM.");
+  }
   if (orderSequentialBtn && orderRandomBtn) {
     orderSequentialBtn.addEventListener("click", () => {
       sessionConfig.order = "sequential";
