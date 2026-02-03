@@ -78,6 +78,26 @@ label[for="add-mp3-input"] { display: block; /* O inline-block si prefieres */ }
 #playlist-ul li span:not(.track-type) {
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-grow: 1;
 }
+#playlist-ul li.is-playing {
+    background-color: var(--primary-color);
+    color: #000;
+    font-weight: bold;
+}
+#playlist-ul li.is-playing .track-type,
+#playlist-ul li.is-playing .delete-btn {
+    color: #000;
+}
+.playlist-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background-color: var(--primary-color);
+    color: #000;
+    font-weight: bold;
+}
 
 .player-panel { justify-content: start; align-items: center; text-align: center; }
 #player-panel.session-active #welcome-message { display: none; }
