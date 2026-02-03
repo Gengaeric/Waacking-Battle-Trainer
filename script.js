@@ -480,6 +480,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     countdownStartTimeout,
     fadeOutCompletionTimeout;
   let countdownTimeoutId = null;
+  let countdownHideTimeoutId = null;
   let roundEndTime = null;
   let timeRemainingOnPause = null;
   let transitionGuardInterval = null;
@@ -1364,6 +1365,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     clearTimeout(fadeOutCompletionTimeout);
     clearInterval(fadeOutTimeout);
     clearTimeout(countdownTimeoutId);
+    clearTimeout(countdownHideTimeoutId);
     clearInterval(fadeInterval);
     clearInterval(fadeInInterval);
     clearInterval(transitionGuardInterval);
@@ -1373,6 +1375,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     fadeOutCompletionTimeout = null;
     fadeOutTimeout = null;
     countdownTimeoutId = null;
+    countdownHideTimeoutId = null;
     fadeInterval = null;
     fadeInInterval = null;
     transitionGuardInterval = null;
@@ -2497,6 +2500,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!isSessionActive || hasStartedFadeOut) return;
       console.log("[App Timers] Iniciando countdown final...");
       countdownStartTimeout = null;
+      clearTimeout(countdownHideTimeoutId);
+      countdownHideTimeoutId = null;
       if (countdownDisplay) {
         countdownDisplay.style.display = "block";
         countdownDisplay.classList.add("final-seconds");
@@ -2523,6 +2528,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (secondsLeft === 1) {
           countdownTimeoutId = null;
           if (mergedOptions.skipFadeOut && mergedOptions.onSegmentComplete) {
+            countdownHideTimeoutId = setTimeout(() => {
+              if (countdownDisplay) {
+                countdownDisplay.style.display = "none";
+                countdownDisplay.classList.remove("final-seconds");
+              }
+              countdownHideTimeoutId = null;
+            }, 1000);
             mergedOptions.onSegmentComplete();
             return;
           }
