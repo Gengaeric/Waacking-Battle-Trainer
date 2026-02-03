@@ -67,7 +67,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       addYoutube: "Añadir desde YouTube",
       addSpotifyPlaylist: "Añadir desde Spotify",
       connectSpotify: "Conectar con Spotify",
-      currentPlaylistSource: "Lista actual",
+      currentPlaylistSource:
+        "Origen de la playlist actual (elige el correcto para que funcione)",
       playlistSourceSpotify: "Spotify",
       playlistSourceYoutube: "YouTube",
       currentPlaylistManagement: "Gestión de la Lista Actual",
@@ -242,7 +243,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       addYoutube: "Add from YouTube",
       addSpotifyPlaylist: "Add Spotify Playlist (Link)",
       connectSpotify: "Connect with Spotify",
-      currentPlaylistSource: "Current playlist",
+      currentPlaylistSource:
+        "Current playlist source (pick the correct one so the app works)",
       playlistSourceSpotify: "Spotify",
       playlistSourceYoutube: "YouTube",
       currentPlaylistManagement: "Current Playlist Management",
