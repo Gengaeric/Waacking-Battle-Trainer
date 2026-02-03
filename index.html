@@ -10,54 +10,58 @@
 <body>
     <div id="toast-container"></div>
     <div class="app-container">
+        <div class="language-switcher" aria-label="Selector de idioma">
+            <button class="language-btn" type="button" data-lang="es" aria-label="Español">🇦🇷</button>
+            <button class="language-btn" type="button" data-lang="en" aria-label="English">🇬🇧</button>
+        </div>
 
         <h1 class="main-title">
             <img src="images/icon-192x192.png" alt="App Logo" class="title-logo">
             Whacking Battle Trainer
         </h1>
         <section class="info-panel">
-            <button class="info-btn" data-modal="presentacion-modal">Presentación</button>
-            <button class="info-btn" data-modal="tutorial-modal">Tutorial de uso</button>
-            <button class="info-btn" data-modal="contacto-modal">Contacto</button>
+            <button class="info-btn" data-modal="presentacion-modal" data-i18n="infoPresentation">Presentación</button>
+            <button class="info-btn" data-modal="tutorial-modal" data-i18n="infoTutorial">Tutorial de uso</button>
+            <button class="info-btn" data-modal="contacto-modal" data-i18n="infoContact">Contacto</button>
         </section>
         <div class="container">
             <section class="panel playlist-panel">
                 <div class="saved-playlists-controls">
-                    <h2><span class="icon">🎵</span> Mis Playlists</h2>
-                    <select id="saved-playlists-select"><option value="">Cargar una playlist...</option></select>
-                    <button id="delete-playlist-btn" class="button secondary">Borrar Playlist Seleccionada</button>
+                    <h2><span class="icon">🎵</span> <span data-i18n="myPlaylists">Mis Playlists</span></h2>
+                    <select id="saved-playlists-select"><option value="" data-i18n="loadPlaylistOption">Cargar una playlist...</option></select>
+                    <button id="delete-playlist-btn" class="button secondary" data-i18n="deleteSelectedPlaylist">Borrar Playlist Seleccionada</button>
                 </div>
                 <hr>
-                <h2><span class="icon">➕</span> Armar / Editar Playlist</h2>
+                <h2><span class="icon">➕</span> <span data-i18n="buildEditPlaylist">Armar / Editar Playlist</span></h2>
                 <div class="playlist-buttons">
-                    <label for="add-mp3-input" class="button" style="display: none;">Añadir Archivos MP3</label>
+                    <label for="add-mp3-input" class="button" style="display: none;" data-i18n="addMp3">Añadir Archivos MP3</label>
                     <input type="file" id="add-mp3-input" multiple accept="audio/*" style="display: none;">
-                    <button id="add-youtube-btn" class="button" style="display: none;">Añadir desde YouTube</button>
-                    <button id="add-spotify-playlist-btn" class="button">Añadir Playlist Spotify (Link)</button>
-                    <button id="connect-spotify-btn" class="button">Conectar con Spotify</button>
+                    <button id="add-youtube-btn" class="button" style="display: none;" data-i18n="addYoutube">Añadir desde YouTube</button>
+                    <button id="add-spotify-playlist-btn" class="button" data-i18n="addSpotifyPlaylist">Añadir Playlist Spotify (Link)</button>
+                    <button id="connect-spotify-btn" class="button" data-i18n="connectSpotify">Conectar con Spotify</button>
                 </div>
                 <div class="current-playlist-management">
-                    <h4>Gestión de la Lista Actual</h4>
+                    <h4 data-i18n="currentPlaylistManagement">Gestión de la Lista Actual</h4>
                     <div class="playlist-name-group">
-                        <input type="text" id="playlist-name-input" placeholder="Nombre para guardar">
-                        <button id="save-playlist-btn" class="button primary">Guardar</button>
+                        <input type="text" id="playlist-name-input" placeholder="Nombre para guardar" data-i18n-placeholder="playlistNamePlaceholder">
+                        <button id="save-playlist-btn" class="button primary" data-i18n="save">Guardar</button>
                     </div>
-                    <button id="clear-playlist-btn" class="button secondary">Vaciar Lista</button>
+                    <button id="clear-playlist-btn" class="button secondary" data-i18n="clearList">Vaciar Lista</button>
                 </div>
-                <button id="toggle-playlist-btn" class="button secondary">Mostrar Lista (0)</button>
+                <button id="toggle-playlist-btn" class="button secondary" data-i18n="showList">Mostrar Lista (0)</button>
                 <ul id="playlist-ul"></ul>
                 <div class="playlist-status">
                     <span id="playlist-progress">0/0</span>
                     <span id="session-timer">00:00</span>
                 </div>
                  <div id="spotify-status" style="display: none; margin-top: 10px; text-align: center;">
-                    Conectado como: <span id="spotify-user" style="font-weight: bold;"></span> <button id="disconnect-spotify-btn" class="button small danger">Desconectar</button>
+                    <span data-i18n="connectedAs">Conectado como:</span> <span id="spotify-user" style="font-weight: bold;"></span> <button id="disconnect-spotify-btn" class="button small danger" data-i18n="disconnect">Desconectar</button>
                 </div>
             </section>
             <section class="panel player-panel" id="player-panel">
                  <div id="welcome-message">
-                     <h3>¡Bienvenidxs!</h3>
-                     <p style="text-align: center; line-height: 1.6;">Conecta tu cuenta y añade playlists de Spotify para empezar.</p> <p style="text-align: center; font-size: 0.9em;">Usa los botones de arriba para ver la presentación y el tutorial.</p>
+                     <h3 data-i18n="welcomeTitle">¡Bienvenidxs!</h3>
+                     <p style="text-align: center; line-height: 1.6;" data-i18n="welcomeText">Conecta tu cuenta y añade playlists de Spotify para empezar.</p> <p style="text-align: center; font-size: 0.9em;" data-i18n="welcomeHint">Usa los botones de arriba para ver la presentación y el tutorial.</p>
                  </div>
                  <div id="player-controls" style="display: none;">
                      <div class="fixed-controls">
@@ -67,7 +71,7 @@
                             <button id="prev-btn" class="control-btn">⏮️</button>
                             <button id="play-pause-btn" class="control-btn play-btn">▶️</button>
                             <button id="next-btn" class="control-btn">⏭️</button>
-                            <button id="toggle-video-btn" class="control-btn" title="Mostrar/Ocultar video" style="display: none;">📺</button>
+                            <button id="toggle-video-btn" class="control-btn" title="Mostrar/Ocultar video" style="display: none;" data-i18n-title="toggleVideoTitle">📺</button>
                         </div>
                     </div>
                     <div id="youtube-player-container" style="display: none;"><div id="youtube-player"></div></div>
@@ -75,109 +79,109 @@
                  </div>
             </section>
             <section class="panel config-panel">
-                <h2><span class="icon">⚙️</span> Configuración</h2>
+                <h2><span class="icon">⚙️</span> <span data-i18n="configTitle">Configuración</span></h2>
                <div class="config-group">
-                   <label>Duración del Round</label>
+                   <label data-i18n="roundDuration">Duración del Round</label>
                    <div class="btn-group">
-                       <button id="duration-40" class="config-btn active">40 seg</button>
-                       <button id="duration-60" class="config-btn">1 min</button>
+                       <button id="duration-40" class="config-btn active" data-i18n="duration40">40 seg</button>
+                       <button id="duration-60" class="config-btn" data-i18n="duration60">1 min</button>
                    </div>
                </div>
                <div class="config-group">
-                   <label>Modo de entrenamiento</label>
+                   <label data-i18n="trainingMode">Modo de entrenamiento</label>
                    <div class="btn-group">
-                       <button id="train-partner-no" class="config-btn active">Solitario</button>
-                       <button id="train-partner-yes" class="config-btn">Con alguien</button>
+                       <button id="train-partner-no" class="config-btn active" data-i18n="trainingSolo">Solitario</button>
+                       <button id="train-partner-yes" class="config-btn" data-i18n="trainingPartner">Con alguien</button>
                    </div>
                </div>
                <div class="config-group">
-                   <label for="segment-select">Segmento de Canción</label>
+                   <label for="segment-select" data-i18n="songSegment">Segmento de Canción</label>
                    <select id="segment-select">
-                       <option value="principio">Principio</option>
-                       <option value="medio">Medio</option>
-                       <option value="final">Final</option>
-                       <option value="azar">Azar</option>
+                       <option value="principio" data-i18n="segmentStart">Principio</option>
+                       <option value="medio" data-i18n="segmentMiddle">Medio</option>
+                       <option value="final" data-i18n="segmentEnd">Final</option>
+                       <option value="azar" data-i18n="segmentRandom">Azar</option>
                    </select>
-                  <p class="config-helper">
+                  <p class="config-helper" data-i18n="segmentHelper">
                       En modo “Con alguien”, el segmento se reproduce dos veces antes de pasar al siguiente tema.
                   </p>
                </div>
                <div class="config-group">
-                   <label>Orden de Reproducción</label>
+                   <label data-i18n="playbackOrder">Orden de Reproducción</label>
                    <div class="btn-group">
-                       <button id="order-sequential" class="config-btn active">En orden</button>
-                       <button id="order-random" class="config-btn">Al azar</button>
+                       <button id="order-sequential" class="config-btn active" data-i18n="orderSequential">En orden</button>
+                       <button id="order-random" class="config-btn" data-i18n="orderRandom">Al azar</button>
                    </div>
                </div>
                <div class="config-group">
-                   <label for="gap-input">Pausa entre Canciones (seg)</label>
+                   <label for="gap-input" data-i18n="gapBetweenSongs">Pausa entre Canciones (seg)</label>
                    <input type="number" id="gap-input" value="3" min="0" max="10">
                </div>
                <div class="session-buttons">
-                   <button id="start-session-btn">¡COMENZAR SESIÓN!</button>
-                   <button id="end-session-btn" class="button danger">Finalizar Sesión</button>
+                   <button id="start-session-btn" data-i18n="startSession">¡COMENZAR SESIÓN!</button>
+                   <button id="end-session-btn" class="button danger" data-i18n="endSession">Finalizar Sesión</button>
                </div>
             </section>
         </div>
     </div>
 
     <div id="modal-overlay" class="hidden">
-        <div id="presentacion-modal" class="modal hidden">
+         <div id="presentacion-modal" class="modal hidden">
              <button class="close-modal-btn">×</button>
              <div class="modal-content">
-                 <h2>Presentación</h2>
-                 <h4>Whacking Battle Trainer: Tu Sesión de Baile Automatizada.</h4>
-                 <p>Esta es una aplicación web diseñada para automatizar tus entrenamientos, replicando la sensación de una batalla o un showcase. Te permite cargar tu música, configurar los rounds y olvidarte del celular para concentrarte 100% en bailar.</p>
+                 <h2 data-i18n="modalPresentationTitle">Presentación</h2>
+                 <h4 data-i18n="modalPresentationSubtitle">Whacking Battle Trainer: Tu Sesión de Baile Automatizada.</h4>
+                 <p data-i18n="presentationIntro">Esta es una aplicación web diseñada para automatizar tus entrenamientos, replicando la sensación de una batalla o un showcase. Te permite cargar tu música, configurar los rounds y olvidarte del celular para concentrarte 100% en bailar.</p>
                  <hr>
-                 <h4>Detalles Pensados para Bailarines:</h4>
+                 <h4 data-i18n="presentationDetails">Detalles Pensados para Bailarines:</h4>
                  <ul>
-                     <li><b>Rounds a Medida:</b> Elegí la duración de tus salidas (40 o 60 segundos) para practicar con los tiempos de una batalla real.</li>
-                     <li><b>Pausa para Respirar:</b> Entre cada round, tenés unos segundos de pausa (que podés configurar) para recuperar el aliento y prepararte para la siguiente canción.</li>
-                     <li><b>Transiciones de DJ (Fade-In & Out):</b> La música no te sorprende. Sube y baja suavemente al inicio y final de cada round, dándote tiempo para empezar y terminar tu fraseo sin cortes bruscos.</li>
-                     <li><b>Entrenamiento por Segmentos:</b> ¿Siempre bailás los mismos 30 segundos de cada tema? Con las opciones de "Principio", "Medio" y "Final", podés forzarte a entrenar con diferentes partes de las canciones.</li>
-                     <li><b>Modo Azar Inteligente:</b> La opción "Azar" está diseñada para respetar la musicalidad. En vez de empezar en un segundo cualquiera, el sistema lo ajusta para que coincida con la estructura de la música. La mayoría de temas funk y disco de Whacking tienen un tempo ~120 BPM. Esto permite que haya más posibilidades de que la canción arranque en el "1", el inicio de una frase musical, para que tu entrada sea siempre potente.</li>
-                    <li><b>Respuesta Instantánea (Modo de entrenamiento):</b> Si elegís “Con alguien”, cada canción suena en dos segmentos seguidos. Después del primer conteo de 5 beeps, la música sigue sin fade-out para que la otra persona responda al instante. Al terminar el segundo segmento, vuelven los beeps, hay fade-out y recién ahí se cambia de tema. Esto recrea la autenticidad de una batalla real.</li>
-                    <li><b>Claridad de enfoque:</b> En “Solitario”, cada tema se reproduce una sola vez para que puedas concentrarte en tu salida y la musicalidad sin cortes extra.</li>
-                     <li><b>Cero Interrupciones (Pantalla Activa):</b> Al iniciar una sesión, la app evita que la pantalla de tu celular se apague. Tu única misión es bailar, sin tocar nada.</li>
-                     <li><b>Flujo Ininterrumpido (Anti-Errores):</b> ¿Un video de YouTube está protegido? La app te avisará con una notificación que no detiene la música y <strong>saltará automáticamente al siguiente tema</strong>. El ritmo nunca para.</li>
+                     <li data-i18n-html="presentationRound"><b>Rounds a Medida:</b> Elegí la duración de tus salidas (40 o 60 segundos) para practicar con los tiempos de una batalla real.</li>
+                     <li data-i18n-html="presentationPause"><b>Pausa para Respirar:</b> Entre cada round, tenés unos segundos de pausa (que podés configurar) para recuperar el aliento y prepararte para la siguiente canción.</li>
+                     <li data-i18n-html="presentationTransitions"><b>Transiciones de DJ (Fade-In & Out):</b> La música no te sorprende. Sube y baja suavemente al inicio y final de cada round, dándote tiempo para empezar y terminar tu fraseo sin cortes bruscos.</li>
+                     <li data-i18n-html="presentationSegments"><b>Entrenamiento por Segmentos:</b> ¿Siempre bailás los mismos 30 segundos de cada tema? Con las opciones de "Principio", "Medio" y "Final", podés forzarte a entrenar con diferentes partes de las canciones.</li>
+                     <li data-i18n-html="presentationSmartRandom"><b>Modo Azar Inteligente:</b> La opción "Azar" está diseñada para respetar la musicalidad. En vez de empezar en un segundo cualquiera, el sistema lo ajusta para que coincida con la estructura de la música. La mayoría de temas funk y disco de Whacking tienen un tempo ~120 BPM. Esto permite que haya más posibilidades de que la canción arranque en el "1", el inicio de una frase musical, para que tu entrada sea siempre potente.</li>
+                    <li data-i18n-html="presentationInstantResponse"><b>Respuesta Instantánea (Modo de entrenamiento):</b> Si elegís “Con alguien”, cada canción suena en dos segmentos seguidos. Después del primer conteo de 5 beeps, la música sigue sin fade-out para que la otra persona responda al instante. Al terminar el segundo segmento, vuelven los beeps, hay fade-out y recién ahí se cambia de tema. Esto recrea la autenticidad de una batalla real.</li>
+                    <li data-i18n-html="presentationFocus"><b>Claridad de enfoque:</b> En “Solitario”, cada tema se reproduce una sola vez para que puedas concentrarte en tu salida y la musicalidad sin cortes extra.</li>
+                     <li data-i18n-html="presentationNoInterruptions"><b>Cero Interrupciones (Pantalla Activa):</b> Al iniciar una sesión, la app evita que la pantalla de tu celular se apague. Tu única misión es bailar, sin tocar nada.</li>
+                     <li data-i18n-html="presentationFlow"><b>Flujo Ininterrumpido (Anti-Errores):</b> ¿Un video de YouTube está protegido? La app te avisará con una notificación que no detiene la música y <strong>saltará automáticamente al siguiente tema</strong>. El ritmo nunca para.</li>
                  </ul>
              </div>
          </div>
          <div id="tutorial-modal" class="modal hidden">
              <button class="close-modal-btn">×</button>
              <div class="modal-content">
-                 <h2>Tutorial de uso</h2>
-                 <h4>¡Bienvenidxs al Trainer!</h4>
-                 <p>Esta app está diseñada para que sus entrenamientos sean fluidos y enfocados. Aquí te explicamos cómo funciona:</p>
+                 <h2 data-i18n="modalTutorialTitle">Tutorial de uso</h2>
+                 <h4 data-i18n="modalTutorialSubtitle">¡Bienvenidxs al Trainer!</h4>
+                 <p data-i18n="tutorialIntro">Esta app está diseñada para que sus entrenamientos sean fluidos y enfocados. Aquí te explicamos cómo funciona:</p>
                  <ol>
-                     <li><strong>Carga tu Música:</strong> Presiona "Añadir Playlist Spotify (Link)" y pega el enlace de la playlist que quieras usar. Necesitarás conectar tu cuenta de Spotify primero.</li> <li><strong>Guarda tu Playlist (Opcional):</strong> Si te gustó la lista que armaste, ponele un nombre claro en el campo de "Nombre para guardar" y presioná "Guardar". La próxima vez, podrás cargarla al instante desde el menú "Mis Playlists".</li>
-                     <li><strong>Configura tu Sesión y ¡a Bailar!:</strong> En el panel de Configuración, ajusta tu sesión. Cuando esté todo listo, ¡presioná "¡COMENZAR SESIÓN!".</li>
+                     <li data-i18n-html="tutorialStep1"><strong>Carga tu Música:</strong> Presiona "Añadir Playlist Spotify (Link)" y pega el enlace de la playlist que quieras usar. Necesitarás conectar tu cuenta de Spotify primero.</li> <li data-i18n-html="tutorialStep2"><strong>Guarda tu Playlist (Opcional):</strong> Si te gustó la lista que armaste, ponele un nombre claro en el campo de "Nombre para guardar" y presioná "Guardar". La próxima vez, podrás cargarla al instante desde el menú "Mis Playlists".</li>
+                     <li data-i18n-html="tutorialStep3"><strong>Configura tu Sesión y ¡a Bailar!:</strong> En el panel de Configuración, ajusta tu sesión. Cuando esté todo listo, ¡presioná "¡COMENZAR SESIÓN!".</li>
                  </ol>
                  <hr>
-                 <h4>Solución a problemas comunes</h4>
+                 <h4 data-i18n="tutorialTroubleshoot">Solución a problemas comunes</h4>
                  <ul>
-                     <li><b>"Spotify me dice que necesito Premium":</b> La reproducción dentro de la app requiere una cuenta Spotify Premium.</li>
-                     <li><b>"No se carga la playlist de Spotify":</b> Asegúrate de estar conectado a internet y de haber iniciado sesión con Spotify en la app. Verifica que el link sea correcto.</li>
-                     <li><b>"No se escucha nada":</b> Revisá que el volumen de 'multimedia' de tu celular no esté en silencio.</li>
+                     <li data-i18n-html="tutorialIssuePremium"><b>"Spotify me dice que necesito Premium":</b> La reproducción dentro de la app requiere una cuenta Spotify Premium.</li>
+                     <li data-i18n-html="tutorialIssuePlaylist"><b>"No se carga la playlist de Spotify":</b> Asegúrate de estar conectado a internet y de haber iniciado sesión con Spotify en la app. Verifica que el link sea correcto.</li>
+                     <li data-i18n-html="tutorialIssueAudio"><b>"No se escucha nada":</b> Revisá que el volumen de 'multimedia' de tu celular no esté en silencio.</li>
                  </ul>
              </div>
          </div>
          <div id="contacto-modal" class="modal hidden">
              <button class="close-modal-btn">×</button>
              <div class="modal-content">
-                 <h2>Contacto</h2>
-                <h4>Hola, soy Eric (a.k.a. Genga)</h4>
-                <p>Soy estudiante avanzado de Ciencias de la Educación en la Universidad de San Andrés y miembro oficial de la crew <a href="https://www.instagram.com/waackerangers/" target="_blank" rel="noopener noreferrer">@waackerangers</a> ⚡</p>
+                 <h2 data-i18n="modalContactTitle">Contacto</h2>
+                <h4 data-i18n="contactSubtitle">Hola, soy Eric (a.k.a. Genga)</h4>
+                <p data-i18n-html="contactIntro">Soy estudiante avanzado de Ciencias de la Educación en la Universidad de San Andrés y miembro oficial de la crew <a href="https://www.instagram.com/waackerangers/" target="_blank" rel="noopener noreferrer">@waackerangers</a> ⚡</p>
                  <hr>
-                 <h4>¿Por qué cree esta herramienta?</h4>
-                 <p>La primera vez que fui a una competencia de Whacking, me sentí como si descubriera un mundo nuevo. La comunidad unida, la energía de divas y el amor por la danza de las batallas me dejaron una huella, y desde ahí supe que quería dedicarme a entrenar para, algún día, poder competir.</p>
-                 <p>El problema era que no siempre tenía con quién practicar; alguien que regulara el tiempo o cambiara las canciones para simular una batalla real y poder enfocarme en mis entradas. Como no sé nada de programación, empecé a construirme esta aplicación en un largo proceso de idas y vueltas con Gemini (la IA de Google). El resultado es esta herramienta, un "partner digital" que hoy me permite entrenar para una competencia en donde sea.</p>
-                 <p>Mi objetivo con esta app es simple: compartirla de forma gratuita con todxs lxs whackers que la necesiten, para que puedan entrenar siempre que quieran.</p>
+                 <h4 data-i18n="contactWhyTitle">¿Por qué cree esta herramienta?</h4>
+                 <p data-i18n="contactWhyParagraph1">La primera vez que fui a una competencia de Whacking, me sentí como si descubriera un mundo nuevo. La comunidad unida, la energía de divas y el amor por la danza de las batallas me dejaron una huella, y desde ahí supe que quería dedicarme a entrenar para, algún día, poder competir.</p>
+                 <p data-i18n="contactWhyParagraph2">El problema era que no siempre tenía con quién practicar; alguien que regulara el tiempo o cambiara las canciones para simular una batalla real y poder enfocarme en mis entradas. Como no sé nada de programación, empecé a construirme esta aplicación en un largo proceso de idas y vueltas con Gemini (la IA de Google). El resultado es esta herramienta, un "partner digital" que hoy me permite entrenar para una competencia en donde sea.</p>
+                 <p data-i18n="contactWhyParagraph3">Mi objetivo con esta app es simple: compartirla de forma gratuita con todxs lxs whackers que la necesiten, para que puedan entrenar siempre que quieran.</p>
                  <hr>
-                 <h4>¿Ideas o Sugerencias?</h4>
-                 <p>Si tenés alguna idea para mejorar la app o simplemente querés conectar, podés encontrarme en:</p>
+                 <h4 data-i18n="contactIdeasTitle">¿Ideas o Sugerencias?</h4>
+                 <p data-i18n="contactIdeasText">Si tenés alguna idea para mejorar la app o simplemente querés conectar, podés encontrarme en:</p>
                  <ul>
-                    <li><strong>Instagram:</strong> <a href="https://www.instagram.com/Genga_eric" target="_blank" rel="noopener noreferrer">@Genga_eric</a></li>
+                    <li data-i18n-html="contactInstagram"><strong>Instagram:</strong> <a href="https://www.instagram.com/Genga_eric" target="_blank" rel="noopener noreferrer">@Genga_eric</a></li>
                  </ul>
              </div>
          </div>

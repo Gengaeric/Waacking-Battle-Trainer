@@ -49,6 +49,390 @@ document.addEventListener("DOMContentLoaded", async () => {
   const modalOverlay = document.getElementById("modal-overlay");
   const infoBtns = document.querySelectorAll(".info-btn");
   const closeBtns = document.querySelectorAll(".close-modal-btn");
+  const languageButtons = document.querySelectorAll(".language-btn");
+
+  const translations = {
+    es: {
+      infoPresentation: "Presentación",
+      infoTutorial: "Tutorial de uso",
+      infoContact: "Contacto",
+      myPlaylists: "Mis Playlists",
+      loadPlaylistOption: "Cargar una playlist...",
+      deleteSelectedPlaylist: "Borrar Playlist Seleccionada",
+      buildEditPlaylist: "Armar / Editar Playlist",
+      addMp3: "Añadir Archivos MP3",
+      addYoutube: "Añadir desde YouTube",
+      addSpotifyPlaylist: "Añadir Playlist Spotify (Link)",
+      connectSpotify: "Conectar con Spotify",
+      currentPlaylistManagement: "Gestión de la Lista Actual",
+      playlistNamePlaceholder: "Nombre para guardar",
+      save: "Guardar",
+      clearList: "Vaciar Lista",
+      showList: "Mostrar Lista",
+      hideList: "Ocultar Lista",
+      connectedAs: "Conectado como:",
+      disconnect: "Desconectar",
+      welcomeTitle: "¡Bienvenidxs!",
+      welcomeText: "Conecta tu cuenta y añade playlists de Spotify para empezar.",
+      welcomeHint: "Usa los botones de arriba para ver la presentación y el tutorial.",
+      toggleVideoTitle: "Mostrar/Ocultar video",
+      configTitle: "Configuración",
+      roundDuration: "Duración del Round",
+      duration40: "40 seg",
+      duration60: "1 min",
+      trainingMode: "Modo de entrenamiento",
+      trainingSolo: "Solitario",
+      trainingPartner: "Con alguien",
+      songSegment: "Segmento de Canción",
+      segmentStart: "Principio",
+      segmentMiddle: "Medio",
+      segmentEnd: "Final",
+      segmentRandom: "Azar",
+      segmentHelper:
+        "En modo “Con alguien”, el segmento se reproduce dos veces antes de pasar al siguiente tema.",
+      playbackOrder: "Orden de Reproducción",
+      orderSequential: "En orden",
+      orderRandom: "Al azar",
+      gapBetweenSongs: "Pausa entre Canciones (seg)",
+      startSession: "¡COMENZAR SESIÓN!",
+      endSession: "Finalizar Sesión",
+      modalPresentationTitle: "Presentación",
+      modalPresentationSubtitle:
+        "Whacking Battle Trainer: Tu Sesión de Baile Automatizada.",
+      presentationIntro:
+        "Esta es una aplicación web diseñada para automatizar tus entrenamientos, replicando la sensación de una batalla o un showcase. Te permite cargar tu música, configurar los rounds y olvidarte del celular para concentrarte 100% en bailar.",
+      presentationDetails: "Detalles Pensados para Bailarines:",
+      presentationRound:
+        "<b>Rounds a Medida:</b> Elegí la duración de tus salidas (40 o 60 segundos) para practicar con los tiempos de una batalla real.",
+      presentationPause:
+        "<b>Pausa para Respirar:</b> Entre cada round, tenés unos segundos de pausa (que podés configurar) para recuperar el aliento y prepararte para la siguiente canción.",
+      presentationTransitions:
+        "<b>Transiciones de DJ (Fade-In & Out):</b> La música no te sorprende. Sube y baja suavemente al inicio y final de cada round, dándote tiempo para empezar y terminar tu fraseo sin cortes bruscos.",
+      presentationSegments:
+        '<b>Entrenamiento por Segmentos:</b> ¿Siempre bailás los mismos 30 segundos de cada tema? Con las opciones de "Principio", "Medio" y "Final", podés forzarte a entrenar con diferentes partes de las canciones.',
+      presentationSmartRandom:
+        '<b>Modo Azar Inteligente:</b> La opción "Azar" está diseñada para respetar la musicalidad. En vez de empezar en un segundo cualquiera, el sistema lo ajusta para que coincida con la estructura de la música. La mayoría de temas funk y disco de Whacking tienen un tempo ~120 BPM. Esto permite que haya más posibilidades de que la canción arranque en el "1", el inicio de una frase musical, para que tu entrada sea siempre potente.',
+      presentationInstantResponse:
+        "<b>Respuesta Instantánea (Modo de entrenamiento):</b> Si elegís “Con alguien”, cada canción suena en dos segmentos seguidos. Después del primer conteo de 5 beeps, la música sigue sin fade-out para que la otra persona responda al instante. Al terminar el segundo segmento, vuelven los beeps, hay fade-out y recién ahí se cambia de tema. Esto recrea la autenticidad de una batalla real.",
+      presentationFocus:
+        "<b>Claridad de enfoque:</b> En “Solitario”, cada tema se reproduce una sola vez para que puedas concentrarte en tu salida y la musicalidad sin cortes extra.",
+      presentationNoInterruptions:
+        "<b>Cero Interrupciones (Pantalla Activa):</b> Al iniciar una sesión, la app evita que la pantalla de tu celular se apague. Tu única misión es bailar, sin tocar nada.",
+      presentationFlow:
+        "<b>Flujo Ininterrumpido (Anti-Errores):</b> ¿Un video de YouTube está protegido? La app te avisará con una notificación que no detiene la música y <strong>saltará automáticamente al siguiente tema</strong>. El ritmo nunca para.",
+      modalTutorialTitle: "Tutorial de uso",
+      modalTutorialSubtitle: "¡Bienvenidxs al Trainer!",
+      tutorialIntro:
+        "Esta app está diseñada para que sus entrenamientos sean fluidos y enfocados. Aquí te explicamos cómo funciona:",
+      tutorialStep1:
+        '<strong>Carga tu Música:</strong> Presiona "Añadir Playlist Spotify (Link)" y pega el enlace de la playlist que quieras usar. Necesitarás conectar tu cuenta de Spotify primero.',
+      tutorialStep2:
+        '<strong>Guarda tu Playlist (Opcional):</strong> Si te gustó la lista que armaste, ponele un nombre claro en el campo de "Nombre para guardar" y presioná "Guardar". La próxima vez, podrás cargarla al instante desde el menú "Mis Playlists".',
+      tutorialStep3:
+        '<strong>Configura tu Sesión y ¡a Bailar!:</strong> En el panel de Configuración, ajusta tu sesión. Cuando esté todo listo, ¡presioná "¡COMENZAR SESIÓN!".',
+      tutorialTroubleshoot: "Solución a problemas comunes",
+      tutorialIssuePremium:
+        '<b>"Spotify me dice que necesito Premium":</b> La reproducción dentro de la app requiere una cuenta Spotify Premium.',
+      tutorialIssuePlaylist:
+        '<b>"No se carga la playlist de Spotify":</b> Asegúrate de estar conectado a internet y de haber iniciado sesión con Spotify en la app. Verifica que el link sea correcto.',
+      tutorialIssueAudio:
+        '<b>"No se escucha nada":</b> Revisá que el volumen de "multimedia" de tu celular no esté en silencio.',
+      modalContactTitle: "Contacto",
+      contactSubtitle: "Hola, soy Eric (a.k.a. Genga)",
+      contactIntro:
+        'Soy estudiante avanzado de Ciencias de la Educación en la Universidad de San Andrés y miembro oficial de la crew <a href="https://www.instagram.com/waackerangers/" target="_blank" rel="noopener noreferrer">@waackerangers</a> ⚡',
+      contactWhyTitle: "¿Por qué cree esta herramienta?",
+      contactWhyParagraph1:
+        "La primera vez que fui a una competencia de Whacking, me sentí como si descubriera un mundo nuevo. La comunidad unida, la energía de divas y el amor por la danza de las batallas me dejaron una huella, y desde ahí supe que quería dedicarme a entrenar para, algún día, poder competir.",
+      contactWhyParagraph2:
+        'El problema era que no siempre tenía con quién practicar; alguien que regulara el tiempo o cambiara las canciones para simular una batalla real y poder enfocarme en mis entradas. Como no sé nada de programación, empecé a construirme esta aplicación en un largo proceso de idas y vueltas con Gemini (la IA de Google). El resultado es esta herramienta, un "partner digital" que hoy me permite entrenar para una competencia en donde sea.',
+      contactWhyParagraph3:
+        "Mi objetivo con esta app es simple: compartirla de forma gratuita con todxs lxs whackers que la necesiten, para que puedan entrenar siempre que quieran.",
+      contactIdeasTitle: "¿Ideas o Sugerencias?",
+      contactIdeasText:
+        "Si tenés alguna idea para mejorar la app o simplemente querés conectar, podés encontrarme en:",
+      contactInstagram:
+        '<strong>Instagram:</strong> <a href="https://www.instagram.com/Genga_eric" target="_blank" rel="noopener noreferrer">@Genga_eric</a>',
+      toastSpotifyTokenError: "Error al obtener token: {message}",
+      toastSpotifySaveError: "Error al guardar sesión Spotify.",
+      toastSpotifyRefreshError: "Error renovando conexión Spotify: {message}",
+      toastSpotifyPlayerLoadError: "Error carga Spotify Player.",
+      toastSpotifyFatalSdk: "Error fatal SDK Spotify.",
+      toastSpotifyNoId:
+        "Error grave al iniciar reproductor Spotify (No ID).",
+      toastSpotifyPremiumError: "Error Player: ¿Spotify Premium activo?",
+      toastSpotifyInitError: "Error init Spotify: {message}",
+      toastSpotifyAuthError: "Error auth Spotify. Reconectar.",
+      toastSpotifyAccountError: "Error cuenta Spotify: {message}",
+      toastSpotifyPlaybackError: "Error playback Spotify: {message}. Saltando...",
+      toastSpotifyConnectFail: "Fallo al conectar reproductor Spotify.",
+      toastSpotifyCreateError: "Error crítico al crear Player Spotify.",
+      toastSpotifyCheckError: "Error verificando conexión Spotify.",
+      toastSpotifyClientIdMissing:
+        "Error: Client ID de Spotify no configurado.",
+      toastSpotifyConnectError: "Error al intentar conectar con Spotify.",
+      toastSpotifyChecking: "Verificando conexión Spotify...",
+      toastSpotifyTokenFetchError: "Error al obtener token de Spotify.",
+      toastSpotifySecurityError: "Error de seguridad (PKCE).",
+      toastSpotifyError: "Error de Spotify: {message}",
+      toastSpotifyNeedConnect: "Necesitas conectar Spotify.",
+      toastSpotifyLoadingPlaylist: "Cargando playlist Spotify...",
+      toastSpotifyLoadedPlaylist: "Playlist Spotify cargada ({count}).",
+      toastSpotifyNoTracks: "No se encontraron canciones.",
+      toastSpotifyLoadError: "Error cargar playlist: {message}",
+      toastSpotifyInternalError: "Error interno Spotify.",
+      toastSpotifyActivateError: "{message}",
+      toastSpotifyActivateDefault: "Error activar reproductor.",
+      toastTrackUnplayable: '"{song}" no se puede reproducir. Saltando...',
+      toastMp3Saving: "Guardando MP3s en la base de datos...",
+      toastMp3Ready: "MP3s listos para usar.",
+      toastMp3SaveError: "Error al guardar los archivos MP3.",
+      promptYoutubeUrl: "Pega el link del video o playlist de YouTube:",
+      toastYoutubeLoading: "Cargando playlist...",
+      toastYoutubeApiMissing: "Error: Falta la clave de API.",
+      toastYoutubeInvalidUrl: "URL de YouTube no válida.",
+      toastYoutubeLoaded: "Playlist cargada con éxito.",
+      toastYoutubeLoadError: "Error al cargar desde YouTube.",
+      confirmClearPlaylist: "¿Seguro?",
+      toastPlaylistNameMissing: "Ponle un nombre a tu playlist.",
+      toastPlaylistEmpty: "La playlist está vacía.",
+      toastPlaylistSaved: 'Playlist "{name}" guardada.',
+      toastPlaylistSelectToDelete: "Selecciona una playlist para borrar.",
+      confirmDeletePlaylist:
+        '¿Seguro que quieres borrar la playlist "{name}"?',
+      toastSessionEnded: "La sesión se finalizó.",
+      toastWakeLock: "Pantalla activa durante la sesión.",
+      toastAddSongs: "¡Añade canciones!",
+      toastYoutubeWarning: "Aviso: Videos de YouTube podrían ser omitidos.",
+      toastNoSongsAvailable: "No hay canciones disponibles en la playlist.",
+      toastYtNotReady: "Reproductor YT no listo. Reintentando...",
+      toastUnsupportedFile: "Tipo de archivo no soportado: {name}",
+      toastStartError: "Error iniciando {name}. Saltando...",
+      toastMp3NotFound: 'Error: MP3 "{name}" no encontrado en la DB. Saltando...',
+      toastMp3PlayError: "Error al reproducir el MP3.",
+      toastSpotifyNotReady: "Error: Reproductor Spotify no conectado/listo.",
+      toastSpotifyStarting: "Spotify no terminó de iniciar. Reintenta.",
+      toastSpotifyNoDevice: "Spotify no reportó un dispositivo activo.",
+      toastSpotifyPlaybackSkip: "Error Spotify: {message}. Saltando...",
+      toastPauseError: "Error al pausar/reanudar.",
+      confirmDisconnectSpotify:
+        "¿Desconectar tu cuenta de Spotify de esta app?",
+      toastSpotifyDisconnected: "Desconectado de Spotify.",
+      toastSpotifyConnectFirst: "Primero conecta Spotify.",
+      promptSpotifyPlaylist: "Pega el link de la playlist de Spotify:",
+      toastSpotifyInvalidPlaylist:
+        "El link no parece ser una playlist de Spotify válida.",
+    },
+    en: {
+      infoPresentation: "Presentation",
+      infoTutorial: "How to use",
+      infoContact: "Contact",
+      myPlaylists: "My Playlists",
+      loadPlaylistOption: "Load a playlist...",
+      deleteSelectedPlaylist: "Delete Selected Playlist",
+      buildEditPlaylist: "Build / Edit Playlist",
+      addMp3: "Add MP3 Files",
+      addYoutube: "Add from YouTube",
+      addSpotifyPlaylist: "Add Spotify Playlist (Link)",
+      connectSpotify: "Connect with Spotify",
+      currentPlaylistManagement: "Current Playlist Management",
+      playlistNamePlaceholder: "Name to save",
+      save: "Save",
+      clearList: "Clear List",
+      showList: "Show List",
+      hideList: "Hide List",
+      connectedAs: "Connected as:",
+      disconnect: "Disconnect",
+      welcomeTitle: "Welcome!",
+      welcomeText:
+        "Connect your account and add Spotify playlists to get started.",
+      welcomeHint: "Use the buttons above to view the presentation and guide.",
+      toggleVideoTitle: "Show/Hide video",
+      configTitle: "Settings",
+      roundDuration: "Round Duration",
+      duration40: "40 sec",
+      duration60: "1 min",
+      trainingMode: "Training mode",
+      trainingSolo: "Solo",
+      trainingPartner: "With someone",
+      songSegment: "Song Segment",
+      segmentStart: "Start",
+      segmentMiddle: "Middle",
+      segmentEnd: "End",
+      segmentRandom: "Random",
+      segmentHelper:
+        "In “With someone” mode, the segment plays twice before moving to the next track.",
+      playbackOrder: "Playback Order",
+      orderSequential: "In order",
+      orderRandom: "Random",
+      gapBetweenSongs: "Gap between songs (sec)",
+      startSession: "START SESSION!",
+      endSession: "End Session",
+      modalPresentationTitle: "Presentation",
+      modalPresentationSubtitle:
+        "Whacking Battle Trainer: Your Automated Dance Session.",
+      presentationIntro:
+        "This web app automates your training sessions, replicating the feel of a battle or showcase. It lets you load your music, configure rounds, and forget about your phone so you can focus 100% on dancing.",
+      presentationDetails: "Details designed for dancers:",
+      presentationRound:
+        "<b>Custom Rounds:</b> Choose the duration of your rounds (40 or 60 seconds) to practice battle timing.",
+      presentationPause:
+        "<b>Breathing Break:</b> Between rounds, you get a few seconds of pause (configurable) to catch your breath and prepare for the next song.",
+      presentationTransitions:
+        "<b>DJ Transitions (Fade-In & Out):</b> The music doesn’t jump at you. It fades in and out at the start and end of each round, giving you time to start and finish your phrasing without harsh cuts.",
+      presentationSegments:
+        '<b>Segment Training:</b> Always dancing the same 30 seconds? With "Start", "Middle", and "End", you can force yourself to train different parts of each song.',
+      presentationSmartRandom:
+        '<b>Smart Random Mode:</b> The "Random" option respects musicality. Instead of starting at any second, the system adjusts to match the structure. Most funk and disco Whacking tracks are around 120 BPM, increasing the chance the song starts on "1", the beginning of a musical phrase, for a strong entry.',
+      presentationInstantResponse:
+        "<b>Instant Response (Training mode):</b> If you choose “With someone”, each song plays in two back-to-back segments. After the first 5-beep count, the music continues without a fade-out so the other person can answer instantly. At the end of the second segment, the beeps return, there’s a fade-out, and only then does the track change. This recreates the authenticity of a real battle.",
+      presentationFocus:
+        "<b>Focus Clarity:</b> In “Solo”, each track plays only once so you can focus on your round and musicality without extra cuts.",
+      presentationNoInterruptions:
+        "<b>Zero Interruptions (Screen Awake):</b> When you start a session, the app prevents your phone screen from turning off. Your only mission is to dance, without touching anything.",
+      presentationFlow:
+        "<b>Uninterrupted Flow (Anti-Errors):</b> Is a YouTube video protected? The app will notify you without stopping the music and <strong>automatically skip to the next track</strong>. The rhythm never stops.",
+      modalTutorialTitle: "How to use",
+      modalTutorialSubtitle: "Welcome to the Trainer!",
+      tutorialIntro:
+        "This app is designed to keep your training smooth and focused. Here’s how it works:",
+      tutorialStep1:
+        '<strong>Load your music:</strong> Press "Add Spotify Playlist (Link)" and paste the playlist URL you want to use. You’ll need to connect your Spotify account first.',
+      tutorialStep2:
+        '<strong>Save your playlist (Optional):</strong> If you like the list you built, give it a clear name in the "Name to save" field and press "Save". Next time, you can load it instantly from "My Playlists".',
+      tutorialStep3:
+        '<strong>Configure your session and dance:</strong> In the Settings panel, adjust your session. When everything is ready, press "START SESSION!".',
+      tutorialTroubleshoot: "Troubleshooting",
+      tutorialIssuePremium:
+        '<b>"Spotify says I need Premium":</b> Playback inside the app requires a Spotify Premium account.',
+      tutorialIssuePlaylist:
+        '<b>"The Spotify playlist won’t load":</b> Make sure you are connected to the internet and signed in to Spotify in the app. Check that the link is correct.',
+      tutorialIssueAudio:
+        '<b>"I can’t hear anything":</b> Check that your phone’s media volume isn’t muted.',
+      modalContactTitle: "Contact",
+      contactSubtitle: "Hi, I'm Eric (a.k.a. Genga)",
+      contactIntro:
+        'I’m an advanced Education Sciences student at Universidad de San Andrés and an official member of the crew <a href="https://www.instagram.com/waackerangers/" target="_blank" rel="noopener noreferrer">@waackerangers</a> ⚡',
+      contactWhyTitle: "Why did I create this tool?",
+      contactWhyParagraph1:
+        "The first time I went to a Whacking competition, I felt like I discovered a new world. The united community, diva energy, and love for battle dance left a mark on me, and from then on I knew I wanted to train so that, one day, I could compete.",
+      contactWhyParagraph2:
+        'The problem was that I didn’t always have someone to practice with—someone to keep time or switch songs to simulate a real battle so I could focus on my entries. Since I don’t know programming, I started building this app through a long back-and-forth process with Gemini (Google’s AI). The result is this tool, a "digital partner" that now lets me train for a competition anywhere.',
+      contactWhyParagraph3:
+        "My goal with this app is simple: share it for free with all whackers who need it so they can train whenever they want.",
+      contactIdeasTitle: "Ideas or Suggestions?",
+      contactIdeasText:
+        "If you have any ideas to improve the app or just want to connect, you can find me at:",
+      contactInstagram:
+        '<strong>Instagram:</strong> <a href="https://www.instagram.com/Genga_eric" target="_blank" rel="noopener noreferrer">@Genga_eric</a>',
+      toastSpotifyTokenError: "Error getting token: {message}",
+      toastSpotifySaveError: "Error saving Spotify session.",
+      toastSpotifyRefreshError: "Error refreshing Spotify connection: {message}",
+      toastSpotifyPlayerLoadError: "Error loading Spotify Player.",
+      toastSpotifyFatalSdk: "Fatal Spotify SDK error.",
+      toastSpotifyNoId: "Severe error starting Spotify player (No ID).",
+      toastSpotifyPremiumError: "Player error: Spotify Premium active?",
+      toastSpotifyInitError: "Spotify init error: {message}",
+      toastSpotifyAuthError: "Spotify auth error. Reconnect.",
+      toastSpotifyAccountError: "Spotify account error: {message}",
+      toastSpotifyPlaybackError:
+        "Spotify playback error: {message}. Skipping...",
+      toastSpotifyConnectFail: "Failed to connect Spotify player.",
+      toastSpotifyCreateError: "Critical error creating Spotify Player.",
+      toastSpotifyCheckError: "Error checking Spotify connection.",
+      toastSpotifyClientIdMissing: "Error: Spotify Client ID not configured.",
+      toastSpotifyConnectError: "Error connecting to Spotify.",
+      toastSpotifyChecking: "Checking Spotify connection...",
+      toastSpotifyTokenFetchError: "Error getting Spotify token.",
+      toastSpotifySecurityError: "Security error (PKCE).",
+      toastSpotifyError: "Spotify error: {message}",
+      toastSpotifyNeedConnect: "You need to connect Spotify.",
+      toastSpotifyLoadingPlaylist: "Loading Spotify playlist...",
+      toastSpotifyLoadedPlaylist: "Spotify playlist loaded ({count}).",
+      toastSpotifyNoTracks: "No tracks found.",
+      toastSpotifyLoadError: "Error loading playlist: {message}",
+      toastSpotifyInternalError: "Internal Spotify error.",
+      toastSpotifyActivateError: "{message}",
+      toastSpotifyActivateDefault: "Error activating player.",
+      toastTrackUnplayable: '"{song}" cannot be played. Skipping...',
+      toastMp3Saving: "Saving MP3s to the database...",
+      toastMp3Ready: "MP3s ready to use.",
+      toastMp3SaveError: "Error saving MP3 files.",
+      promptYoutubeUrl: "Paste the YouTube video or playlist link:",
+      toastYoutubeLoading: "Loading playlist...",
+      toastYoutubeApiMissing: "Error: Missing API key.",
+      toastYoutubeInvalidUrl: "Invalid YouTube URL.",
+      toastYoutubeLoaded: "Playlist loaded successfully.",
+      toastYoutubeLoadError: "Error loading from YouTube.",
+      confirmClearPlaylist: "Are you sure?",
+      toastPlaylistNameMissing: "Give your playlist a name.",
+      toastPlaylistEmpty: "The playlist is empty.",
+      toastPlaylistSaved: 'Playlist "{name}" saved.',
+      toastPlaylistSelectToDelete: "Select a playlist to delete.",
+      confirmDeletePlaylist: 'Are you sure you want to delete "{name}"?',
+      toastSessionEnded: "The session ended.",
+      toastWakeLock: "Screen stays awake during the session.",
+      toastAddSongs: "Add songs!",
+      toastYoutubeWarning: "Warning: YouTube videos might be skipped.",
+      toastNoSongsAvailable: "No songs available in the playlist.",
+      toastYtNotReady: "YT player not ready. Retrying...",
+      toastUnsupportedFile: "Unsupported file type: {name}",
+      toastStartError: "Error starting {name}. Skipping...",
+      toastMp3NotFound: 'Error: MP3 "{name}" not found in the DB. Skipping...',
+      toastMp3PlayError: "Error playing MP3.",
+      toastSpotifyNotReady: "Error: Spotify player not connected/ready.",
+      toastSpotifyStarting: "Spotify is still starting. Try again.",
+      toastSpotifyNoDevice: "Spotify did not report an active device.",
+      toastSpotifyPlaybackSkip: "Spotify error: {message}. Skipping...",
+      toastPauseError: "Error pausing/resuming.",
+      confirmDisconnectSpotify: "Disconnect your Spotify account from this app?",
+      toastSpotifyDisconnected: "Disconnected from Spotify.",
+      toastSpotifyConnectFirst: "Connect Spotify first.",
+      promptSpotifyPlaylist: "Paste the Spotify playlist link:",
+      toastSpotifyInvalidPlaylist:
+        "That link doesn't look like a valid Spotify playlist.",
+    },
+  };
+
+  let currentLang = localStorage.getItem("appLang") || "es";
+
+  const t = (key, vars = {}) => {
+    const table = translations[currentLang] || translations.es;
+    const template = table[key] || translations.es[key] || key;
+    return template.replace(/\{(\w+)\}/g, (_, variable) =>
+      Object.prototype.hasOwnProperty.call(vars, variable) ? vars[variable] : "",
+    );
+  };
+
+  const applyTranslations = () => {
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      el.textContent = t(el.dataset.i18n);
+    });
+    document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+      el.innerHTML = t(el.dataset.i18nHtml);
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+      el.setAttribute("placeholder", t(el.dataset.i18nPlaceholder));
+    });
+    document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+      el.setAttribute("title", t(el.dataset.i18nTitle));
+    });
+    if (languageButtons.length > 0) {
+      languageButtons.forEach((btn) => {
+        btn.classList.toggle("is-active", btn.dataset.lang === currentLang);
+      });
+    }
+  };
+
+  const setLanguage = (lang) => {
+    if (!translations[lang]) return;
+    currentLang = lang;
+    localStorage.setItem("appLang", lang);
+    document.documentElement.lang = lang;
+    applyTranslations();
+    updatePlaylistUI();
+    updatePlaylistStatus();
+  };
 
   // --- Variables de Estado ---
   let playlist = [];
@@ -176,7 +560,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   closeBtns.forEach((btn) => btn.addEventListener("click", closeModal));
   modalOverlay.addEventListener("click", (e) => {
     if (e.target === modalOverlay) closeModal();
-  }); // PASO II
+  });
+
+  languageButtons.forEach((btn) => {
+    btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
+  });
+  setLanguage(currentLang);
+  // PASO II
   // ================================================
   // --- LÓGICA SPOTIFY (Auth, Setup, Status, etc.) ---
   // ================================================
@@ -229,7 +619,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return await response.json();
     } catch (error) {
       console.error("[Spotify Auth] Error getSpotifyTokenPKCE:", error);
-      showToast(`Error al obtener token: ${error.message}`, "error");
+      showToast(t("toastSpotifyTokenError", { message: error.message }), "error");
       return null;
     }
   }
@@ -244,7 +634,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log("[Spotify Auth] Tokens guardados.");
     } catch (e) {
       console.error("[Spotify Auth] Error guardando tokens:", e);
-      showToast("Error al guardar sesión Spotify.", "error");
+      showToast(t("toastSpotifySaveError"), "error");
     }
   }
 
@@ -287,7 +677,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       return true;
     } catch (error) {
       console.error("[Spotify Auth] Error refreshTokenPKCE:", error);
-      showToast(`Error renovando conexión Spotify: ${error.message}`, "error");
+      showToast(
+        t("toastSpotifyRefreshError", { message: error.message }),
+        "error",
+      );
       clearSpotifyTokens();
       return false;
     }
@@ -357,7 +750,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     if (!window.Spotify || !window.spotifySdkReady) {
       console.error("[Spotify Player] SDK no listo para setup.");
-      showToast("Error carga Spotify Player.", "error");
+      showToast(t("toastSpotifyPlayerLoadError"), "error");
       return;
     }
     try {
@@ -365,7 +758,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.error(
           "[Spotify Player] Error CRÍTICO: window.Spotify o window.Spotify.Player no están definidos al intentar crear Player.",
         );
-        showToast("Error fatal SDK Spotify.", "error");
+        showToast(t("toastSpotifyFatalSdk"), "error");
         throw new Error("Spotify SDK no completamente cargado."); // Lanzar error para que lo capture el catch
       }
       console.log("[Spotify Player] Creando Spotify.Player...");
@@ -421,10 +814,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             '[Spotify Player] ¡ERROR CRÍTICO! Evento "ready" recibido SIN device_id.',
           );
           spotifyDeviceId = null; // Asegurar que no quede un ID viejo
-          showToast(
-            "Error grave al iniciar reproductor Spotify (No ID).",
-            "error",
-          );
+          showToast(t("toastSpotifyNoId"), "error");
           document.dispatchEvent(new Event("spotifyDeviceError"));
           // Considerar desconectar aquí si esto ocurre?
           // clearSpotifyTokens();
@@ -435,27 +825,27 @@ document.addEventListener("DOMContentLoaded", async () => {
       // --- FIN Listener 'ready' ---
       spotifyPlayer.addListener("not_ready", ({ device_id }) => {
         console.warn("[Spotify Player] Device no listo:", device_id);
-        showToast("Error Player: ¿Spotify Premium activo?", "error");
+        showToast(t("toastSpotifyPremiumError"), "error");
         spotifyDeviceId = null;
       });
       // Listeners de error
       spotifyPlayer.addListener("initialization_error", ({ message }) => {
         console.error("[Spotify Player] Error SDK init:", message);
-        showToast(`Error init Spotify: ${message}`, "error");
+        showToast(t("toastSpotifyInitError", { message }), "error");
       });
       spotifyPlayer.addListener("authentication_error", ({ message }) => {
         console.error("[Spotify Player] Error SDK auth:", message);
-        showToast("Error auth Spotify. Reconectar.", "error");
+        showToast(t("toastSpotifyAuthError"), "error");
         clearSpotifyTokens();
         showDisconnected();
       });
       spotifyPlayer.addListener("account_error", ({ message }) => {
         console.error("[Spotify Player] Error SDK cuenta:", message);
-        showToast(`Error cuenta Spotify: ${message}`, "error");
+        showToast(t("toastSpotifyAccountError", { message }), "error");
       });
       spotifyPlayer.addListener("playback_error", ({ message }) => {
         console.error("[Spotify Player] Error SDK playback:", message);
-        showToast(`Error playback Spotify: ${message}. Saltando...`, "error");
+        showToast(t("toastSpotifyPlaybackError", { message }), "error");
         clearAllTimers();
         setTimeout(() => {
           if (isSessionActive) playNextTrack();
@@ -477,7 +867,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           success ? "Éxito" : "Fallo",
         );
         if (!success) {
-          showToast("Fallo al conectar reproductor Spotify.", "error");
+          showToast(t("toastSpotifyConnectFail"), "error");
         }
       });
     } catch (e) {
@@ -485,7 +875,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         "[Spotify Player] Error creando o conectando Spotify Player:",
         e,
       );
-      showToast("Error crítico al crear Player Spotify.", "error");
+      showToast(t("toastSpotifyCreateError"), "error");
     }
   }
 
@@ -622,7 +1012,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // --- FIN LLAMADA SETUP ---
     } catch (error) {
       console.error("[Spotify Status] Error updateSpotifyStatus:", error);
-      showToast("Error verificando conexión Spotify.", "error");
+      showToast(t("toastSpotifyCheckError"), "error");
       clearSpotifyTokens();
       showDisconnected();
     }
@@ -637,7 +1027,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         SPOTIFY_CLIENT_ID === "PÉGALE_AQUÍ_TU_CLIENT_ID_DE_SPOTIFY"
       ) {
         // Usar el placeholder
-        showToast("Error: Client ID de Spotify no configurado.", "error");
+        showToast(t("toastSpotifyClientIdMissing"), "error");
         console.error("[Spotify Auth] Client ID vacío.");
         return;
       }
@@ -666,7 +1056,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         "[Spotify Auth] Error DENTRO de redirectToSpotifyAuthorize:",
         e,
       );
-      showToast("Error al intentar conectar con Spotify.", "error");
+      showToast(t("toastSpotifyConnectError"), "error");
     }
   }
 
@@ -683,7 +1073,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       localStorage.removeItem("spotify_auth_state"); // Limpiar state usado
       const codeVerifier = localStorage.getItem("spotify_pkce_code_verifier");
       if (codeVerifier) {
-        showToast("Verificando conexión Spotify...", "info");
+        showToast(t("toastSpotifyChecking"), "info");
         const tokenData = await getSpotifyTokenPKCE(code, codeVerifier);
         if (tokenData) {
           storeTokens(tokenData);
@@ -696,18 +1086,21 @@ document.addEventListener("DOMContentLoaded", async () => {
           );
           await updateSpotifyStatus(); // Actualizar UI y setup player
         } else {
-          showToast("Error al obtener token de Spotify.", "error");
+          showToast(t("toastSpotifyTokenFetchError"), "error");
           showDisconnected();
         }
       } else {
         console.error("[Spotify Auth] Falta code_verifier post-callback.");
-        showToast("Error de seguridad (PKCE).", "error");
+        showToast(t("toastSpotifySecurityError"), "error");
         showDisconnected();
       }
     } else if (params.has("error")) {
       // Spotify devolvió un error
       console.error(`[Spotify Auth] Error en callback: ${params.get("error")}`);
-      showToast(`Error de Spotify: ${params.get("error")}`, "error");
+      showToast(
+        t("toastSpotifyError", { message: params.get("error") }),
+        "error",
+      );
       window.history.replaceState({}, document.title, window.location.pathname); // Limpiar URL
       showDisconnected();
     } else {
@@ -726,12 +1119,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log(`[Spotify Load] Intentando cargar playlist ID: ${playlistId}`);
     const accessToken = localStorage.getItem("spotify_access_token");
     if (!accessToken) {
-      showToast("Necesitas conectar Spotify.", "error");
+      showToast(t("toastSpotifyNeedConnect"), "error");
       return;
     }
     let allTracks = [];
     let nextUrl = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?fields=items(track(id,name,artists(name))),next`;
-    showToast(`Cargando playlist Spotify...`, "info");
+    showToast(t("toastSpotifyLoadingPlaylist"), "info");
     try {
       while (nextUrl) {
         console.log("[Spotify Load] Fetching:", nextUrl);
@@ -789,13 +1182,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         await prepareForNewPlaylist();
         playlist = allTracks;
         updatePlaylistUI();
-        showToast(`Playlist Spotify cargada (${allTracks.length}).`, "success");
+        showToast(
+          t("toastSpotifyLoadedPlaylist", { count: allTracks.length }),
+          "success",
+        );
       } else {
-        showToast("No se encontraron canciones.", "info");
+        showToast(t("toastSpotifyNoTracks"), "info");
       }
     } catch (error) {
       console.error("[Spotify Load] Error final:", error);
-      showToast(`Error cargar playlist: ${error.message}`, "error");
+      showToast(t("toastSpotifyLoadError", { message: error.message }), "error");
       if (error.message.includes("Token expirado")) {
         clearSpotifyTokens();
         showDisconnected();
@@ -811,7 +1207,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const accessToken = localStorage.getItem("spotify_access_token");
     if (!accessToken || !deviceId) {
       console.error("[Spotify Play] transferPlayback: Falta token o deviceId.");
-      showToast("Error interno Spotify.", "error");
+      showToast(t("toastSpotifyInternalError"), "error");
       return false;
     }
     try {
@@ -852,7 +1248,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } catch (error) {
       console.error("[Spotify Play] Error catch transfer:", error);
-      showToast(`${error.message || "Error activar reproductor."}`, "error");
+      showToast(
+        t("toastSpotifyActivateError", {
+          message: error.message || t("toastSpotifyActivateDefault"),
+        }),
+        "error",
+      );
       if (error.message.includes("Token expirado")) {
         clearSpotifyTokens();
         showDisconnected();
@@ -925,7 +1326,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   function onPlayerError(event) {
     const songName = playlist[currentTrackIndex]?.name || "un video";
-    showToast(`"${songName}" no se puede reproducir. Saltando...`, "error");
+    showToast(t("toastTrackUnplayable", { song: songName }), "error");
     setTimeout(() => {
       if (isSessionActive) playNextTrack();
     }, 500);
@@ -966,7 +1367,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   addMp3Input.addEventListener("change", async (e) => {
     await prepareForNewPlaylist();
-    showToast("Guardando MP3s en la base de datos...", "info");
+    showToast(t("toastMp3Saving"), "info");
     try {
       for (const file of e.target.files) {
         // Usamos el nombre del archivo como identificador único en la DB
@@ -991,22 +1392,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
       updatePlaylistUI();
-      showToast("MP3s listos para usar.", "success");
+      showToast(t("toastMp3Ready"), "success");
     } catch (error) {
       console.error("Error al guardar MP3 en IndexedDB:", error);
-      showToast("Error al guardar los archivos MP3.", "error");
+      showToast(t("toastMp3SaveError"), "error");
     }
   });
 
   addYoutubeBtn.addEventListener("click", async () => {
-    const url = prompt(
-      "Pega aquí el link del video o de la playlist de YouTube:",
-    );
+    const url = prompt(t("promptYoutubeUrl"));
     if (!url) return;
     await prepareForNewPlaylist();
-    showToast("Cargando playlist...", "info");
+    showToast(t("toastYoutubeLoading"), "info");
     if (YOUTUBE_API_KEY === "AQUI_VA_TU_CLAVE_DE_API" || !YOUTUBE_API_KEY) {
-      showToast("Error: Falta la clave de API.", "error");
+      showToast(t("toastYoutubeApiMissing"), "error");
       return;
     }
     try {
@@ -1049,14 +1448,14 @@ document.addEventListener("DOMContentLoaded", async () => {
           type: "youtube",
         });
       } else {
-        showToast("URL de YouTube no válida.", "error");
+        showToast(t("toastYoutubeInvalidUrl"), "error");
       }
       updatePlaylistUI();
       if (playlist.length > 0)
-        showToast("Playlist cargada con éxito.", "success");
+        showToast(t("toastYoutubeLoaded"), "success");
     } catch (error) {
       console.error(error);
-      showToast("Error al cargar desde YouTube.", "error");
+      showToast(t("toastYoutubeLoadError"), "error");
     }
   });
   function extractVideoID(url) {
@@ -1071,7 +1470,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return match ? match[1] : null;
   }
   clearPlaylistBtn.addEventListener("click", () => {
-    if (confirm("¿Seguro?")) {
+    if (confirm(t("confirmClearPlaylist"))) {
       playlist = [];
       updatePlaylistUI();
     }
@@ -1168,29 +1567,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       playlistUl.appendChild(li);
     });
     const buttonText = playlistUl.classList.contains("visible")
-      ? "Ocultar Lista"
-      : "Mostrar Lista";
+      ? t("hideList")
+      : t("showList");
     togglePlaylistBtn.textContent = `${buttonText} (${playlist.length})`;
     updatePlaylistStatus();
   }
   function savePlaylist() {
     const name = playlistNameInput.value.trim();
     if (!name) {
-      showToast("Ponle un nombre a tu playlist.");
+      showToast(t("toastPlaylistNameMissing"));
       return;
     }
     if (playlist.length === 0) {
-      showToast("La playlist está vacía.");
+      showToast(t("toastPlaylistEmpty"));
       return;
     }
     localStorage.setItem(`playlist_${name}`, JSON.stringify(playlist));
     playlistNameInput.value = "";
-    showToast(`Playlist "${name}" guardada.`, "success");
+    showToast(t("toastPlaylistSaved", { name }), "success");
     loadSavedPlaylists();
   }
   function loadSavedPlaylists() {
-    savedPlaylistsSelect.innerHTML =
-      '<option value="">Cargar una playlist...</option>';
+    savedPlaylistsSelect.innerHTML = `<option value="">${t(
+      "loadPlaylistOption",
+    )}</option>`;
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key.startsWith("playlist_")) {
@@ -1215,18 +1615,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   function deleteSelectedPlaylist() {
     const key = savedPlaylistsSelect.value;
     if (!key) {
-      showToast("Selecciona una playlist para borrar.");
+      showToast(t("toastPlaylistSelectToDelete"));
       return;
     }
     const playlistName = key.replace("playlist_", "");
-    if (confirm(`¿Seguro que quieres borrar la playlist "${playlistName}"?`)) {
+    if (confirm(t("confirmDeletePlaylist", { name: playlistName }))) {
       localStorage.removeItem(key);
       playlist = [];
       updatePlaylistUI();
       loadSavedPlaylists();
       if (isSessionActive) {
         endSession();
-        showToast("La sesión se finalizó.");
+        showToast(t("toastSessionEnded"));
       }
     }
   }
@@ -1236,8 +1636,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   togglePlaylistBtn.addEventListener("click", () => {
     playlistUl.classList.toggle("visible");
     const buttonText = playlistUl.classList.contains("visible")
-      ? "Ocultar Lista"
-      : "Mostrar Lista";
+      ? t("hideList")
+      : t("showList");
     togglePlaylistBtn.textContent = `${buttonText} (${playlist.length})`;
   });
 
@@ -1252,7 +1652,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       try {
         wakeLock = await navigator.wakeLock.request("screen");
         if (showNotification)
-          showToast("Pantalla activa durante la sesión.", "info");
+          showToast(t("toastWakeLock"), "info");
       } catch (err) {
         console.error(`${err.name}, ${err.message}`);
       }
@@ -1276,11 +1676,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   startSessionBtn.addEventListener("click", () => {
     if (playlist.length === 0) {
-      showToast("¡Añade canciones!");
+      showToast(t("toastAddSongs"));
       return;
     }
     if (playlist.some((s) => s.type === "youtube") && !hasShownYoutubeWarning) {
-      showToast("Aviso: Videos de YouTube podrían ser omitidos.", "info");
+      showToast(t("toastYoutubeWarning"), "info");
       hasShownYoutubeWarning = true;
     }
     requestWakeLock();
@@ -1288,7 +1688,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     isPaused = false;
     createPlaybackOrder();
     if (playbackOrder.length === 0) {
-      showToast("No hay canciones disponibles en la playlist.", "error");
+      showToast(t("toastNoSongsAvailable"), "error");
       endSession();
       return;
     }
@@ -1374,7 +1774,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       } else if (song.type === "youtube") {
         if (ytPlayerReady) playYoutube(song);
         else {
-          showToast("Reproductor YT no listo. Reintentando...", "info");
+          showToast(t("toastYtNotReady"), "info");
           setTimeout(() => playTrack(index), 1000);
         } // Reintentar si YT no está listo
       } else if (song.type === "spotify") {
@@ -1385,14 +1785,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         await playSpotifyTrack(song); // <-- Llamar a la función de Spotify
       } else {
         console.warn(`[App Logic] Tipo desconocido (${song.type}), saltando.`);
-        showToast(`Tipo de archivo no soportado: ${song.name}`, "warning");
+        showToast(t("toastUnsupportedFile", { name: song.name }), "warning");
         setTimeout(() => {
           if (isSessionActive) playNextTrack();
         }, 500); // Saltar
       }
     } catch (error) {
       console.error(`[App Logic] Error GRANDE iniciando ${song.name}:`, error);
-      showToast(`Error iniciando ${song.name}. Saltando...`, "error");
+      showToast(t("toastStartError", { name: song.name }), "error");
       clearAllTimers();
       setTimeout(() => {
         if (isSessionActive) playNextTrack();
@@ -1460,10 +1860,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       const record = await db.mp3Files.get(song.dbKey);
       if (!record) {
-        showToast(
-          `Error: MP3 "${song.name}" no encontrado en la DB. Saltando...`,
-          "error",
-        );
+        showToast(t("toastMp3NotFound", { name: song.name }), "error");
         setTimeout(() => {
           if (isSessionActive) playNextTrack();
         }, 500);
@@ -1504,13 +1901,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
     } catch (error) {
       console.error("Error al reproducir MP3 desde DB:", error);
-      showToast("Error al reproducir el MP3.", "error");
+      showToast(t("toastMp3PlayError"), "error");
     }
   }
   async function playSpotifyTrack(song) {
     const accessToken = localStorage.getItem("spotify_access_token");
     if (!accessToken) {
-      showToast("Error: Reproductor Spotify no conectado/listo.", "error");
+      showToast(t("toastSpotifyNotReady"), "error");
       console.error("[Spotify Play] playSpotifyTrack: Falta token.");
       setTimeout(() => {
         if (isSessionActive) playNextTrack();
@@ -1525,7 +1922,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       initializeSpotifyPlayer(accessToken);
       const readyDeviceId = await waitForSpotifyDevice();
       if (!readyDeviceId) {
-        showToast("Spotify no terminó de iniciar. Reintenta.", "error");
+        showToast(t("toastSpotifyStarting"), "error");
         setTimeout(() => {
           if (isSessionActive) playNextTrack();
         }, 1500);
@@ -1535,7 +1932,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const deviceId = spotifyDeviceId || null;
     if (!deviceId) {
-      showToast("Spotify no reportó un dispositivo activo.", "error");
+      showToast(t("toastSpotifyNoDevice"), "error");
       setTimeout(() => {
         if (isSessionActive) playNextTrack();
       }, 1500);
@@ -1626,7 +2023,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       startTrackTimers(durationMs ? durationMs / 1000 : null); // Pasar duración real a timers
     } catch (error) {
       console.error("[Spotify Play] Error GRANDE en playSpotifyTrack:", error);
-      showToast(`Error Spotify: ${error.message}. Saltando...`, "error");
+      showToast(
+        t("toastSpotifyPlaybackSkip", { message: error.message }),
+        "error",
+      );
       if (spotifyPlayer) {
         try {
           await spotifyPlayer.pause();
@@ -2282,7 +2682,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } catch (error) {
       console.error("[App Controls] Error en Play/Pause:", error);
-      showToast("Error al pausar/reanudar.", "error");
+      showToast(t("toastPauseError"), "error");
       isPaused = true; // Forzar estado pausado en caso de error
       if (playPauseBtn) playPauseBtn.textContent = "▶️";
       clearAllTimers();
@@ -2346,10 +2746,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (disconnectSpotifyBtn) {
     disconnectSpotifyBtn.addEventListener("click", () => {
-      if (confirm("¿Desconectar tu cuenta de Spotify de esta app?")) {
+      if (confirm(t("confirmDisconnectSpotify"))) {
         clearSpotifyTokens(); // Borrar tokens guardados
         showDisconnected(); // Actualizar UI y desconectar player
-        showToast("Desconectado de Spotify.", "info");
+        showToast(t("toastSpotifyDisconnected"), "info");
       }
     });
   } else {
@@ -2364,19 +2764,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     addSpotifyPlaylistBtn.addEventListener("click", async () => {
       const accessToken = localStorage.getItem("spotify_access_token");
       if (!accessToken) {
-        showToast("Primero conecta Spotify.", "info");
+        showToast(t("toastSpotifyConnectFirst"), "info");
         return;
       } // Verificar conexión
-      const url = prompt("Pega el link de la playlist de Spotify:");
+      const url = prompt(t("promptSpotifyPlaylist"));
       if (!url) return; // Si cancela
       const playlistId = extractSpotifyPlaylistID(url);
       if (playlistId) {
         await loadSpotifyPlaylist(playlistId); // Llamar a la función de carga
       } else {
-        showToast(
-          "El link no parece ser una playlist de Spotify válida.",
-          "error",
-        );
+        showToast(t("toastSpotifyInvalidPlaylist"), "error");
       }
     });
   } else {
