@@ -1118,9 +1118,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (isSessionActive && songIndex === currentTrackIndex) {
         li.classList.add("is-playing");
       }
-      const typeSpan = document.createElement("span");
-      typeSpan.className = `track-type ${song.type}`;
-      typeSpan.textContent = song.type.toUpperCase();
       const nameSpan = document.createElement("span");
       nameSpan.textContent = song.name;
       const deleteBtn = document.createElement("button");
@@ -1131,7 +1128,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         playlist.splice(songIndex, 1);
         updatePlaylistUI();
       };
-      li.appendChild(typeSpan);
+      if (song.type !== "spotify") {
+        const typeSpan = document.createElement("span");
+        typeSpan.className = `track-type ${song.type}`;
+        typeSpan.textContent = song.type.toUpperCase();
+        li.appendChild(typeSpan);
+      }
       li.appendChild(nameSpan);
       li.appendChild(deleteBtn);
       playlistUl.appendChild(li);
