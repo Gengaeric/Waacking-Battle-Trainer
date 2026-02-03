@@ -26,12 +26,9 @@
         <div class="container">
             <section class="panel playlist-panel">
                 <div class="saved-playlists-controls">
-                    <h2><span class="icon">🎵</span> <span data-i18n="myPlaylists">Mis Playlists</span></h2>
-                    <select id="saved-playlists-select"><option value="" data-i18n="loadPlaylistOption">Cargar una playlist...</option></select>
-                    <button id="delete-playlist-btn" class="button secondary" data-i18n="deleteSelectedPlaylist">Borrar Playlist Seleccionada</button>
+                    <h2><span class="icon">🎵</span> <span data-i18n="myPlaylists">Cargar playlist</span></h2>
                 </div>
                 <hr>
-                <h2><span class="icon">➕</span> <span data-i18n="buildEditPlaylist">Armar / Editar Playlist</span></h2>
                 <div class="playlist-buttons">
                     <label for="add-mp3-input" class="button" style="display: none;" data-i18n="addMp3">Añadir Archivos MP3</label>
                     <input type="file" id="add-mp3-input" multiple accept="audio/*" style="display: none;">
@@ -45,14 +42,6 @@
                         <option value="spotify" data-i18n="playlistSourceSpotify">Spotify</option>
                         <option value="youtube" data-i18n="playlistSourceYoutube">YouTube</option>
                     </select>
-                </div>
-                <div class="current-playlist-management">
-                    <h4 data-i18n="currentPlaylistManagement">Gestión de la Lista Actual</h4>
-                    <div class="playlist-name-group">
-                        <input type="text" id="playlist-name-input" placeholder="Nombre para guardar" data-i18n-placeholder="playlistNamePlaceholder">
-                        <button id="save-playlist-btn" class="button primary" data-i18n="save">Guardar</button>
-                    </div>
-                    <button id="clear-playlist-btn" class="button secondary" data-i18n="clearList">Vaciar Lista</button>
                 </div>
                 <button id="toggle-playlist-btn" class="button secondary" data-i18n="showList">Mostrar Lista (0)</button>
                 <ul id="playlist-ul"></ul>
